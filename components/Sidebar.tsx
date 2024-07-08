@@ -22,9 +22,12 @@ const Sidebar = () => {
       <div className="bg-red-400 p-2 h-[50px]">
         <p className="text-xl font-semibold">ShopEase</p>
       </div>
-      <div className=" gap-10 flex flex-col justify-start p-4 items-center">
+      <div className=" gap-10 flex flex-col justify-start p-4  items-center">
         {sidebarItems.map((item, index) => (
-          <div key={index} className="gap-1 flex flex-col items-center">
+          <div
+            key={index}
+            className="gap-1 flex flex-col hover:text-red-400 cursor-pointer items-center"
+          >
             {item.icon}
             <p>{item.label}</p>
           </div>

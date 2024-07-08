@@ -5,6 +5,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
+import { useUser } from "@/context/UserProvider";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -12,6 +13,7 @@ const LoginPage = () => {
     password: "",
   });
   const router = useRouter();
+  const { setUser } = useUser();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -35,6 +37,7 @@ const LoginPage = () => {
           formData.password
         );
         console.log("User logged in successfully:", userCredential.user);
+        setUser(userDoc.data());
         localStorage.setItem("user", JSON.stringify(userDoc.data()));
         router.push("/dashboard");
       } else {

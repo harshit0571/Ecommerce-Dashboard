@@ -9,7 +9,7 @@ import React, {
 
 interface UserContextType {
   user: any | null;
-  setUser: (user: string | null) => void;
+  setUser: (user: any | null) => void;
   loading: boolean;
 }
 
