@@ -33,7 +33,7 @@ const RegisterPage = () => {
       formData.password
     )
       .then((userCred) => {
-        const ref = doc(db, "users", formData.email);
+        const ref = doc(db, "members", formData.email);
         setDoc(ref, formData);
         console.log(userCred.user, "user", "r");
         router.push("/login");

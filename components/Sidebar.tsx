@@ -34,7 +34,7 @@ const sidebarItems = [
     icon: <MdVerifiedUser size={30} className="m-auto" />,
     label: "Permissions",
     visible: ["super admin"],
-    href: "/dashboard/user-info",
+    href: "/dashboard/permissions",
   },
   {
     icon: <MdSettings size={30} className="m-auto" />,

@@ -27,7 +27,7 @@ const LoginPage = () => {
     e.preventDefault();
     console.log(formData);
     try {
-      const userDocRef = doc(db, "users", formData.email);
+      const userDocRef = doc(db, "members", formData.email);
       const userDoc = await getDoc(userDocRef);
       console.log(userDoc.data());
       if (userDoc.exists() && userDoc.data().verification) {
