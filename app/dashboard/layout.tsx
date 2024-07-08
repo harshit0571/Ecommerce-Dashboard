@@ -17,7 +17,7 @@ const layout = ({
       router.push("/login");
     } else if (user) {
       if (user.role == "support") {
-        router.push("dashboard/user-info");
+        router.push("/dashboard/user-info");
       }
     }
   }, [user, loading]);

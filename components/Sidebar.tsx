@@ -1,4 +1,5 @@
 import { useUser } from "@/context/UserProvider";
+import Link from "next/link";
 import React from "react";
 import { AiFillDashboard } from "react-icons/ai";
 import { FaProductHunt, FaUser } from "react-icons/fa";
@@ -9,31 +10,37 @@ const sidebarItems = [
     icon: <AiFillDashboard size={30} className="m-auto" />,
     label: "Dashboard",
     visible: ["super admin", "admin"],
+    href: "/dashboard",
   },
   {
     icon: <FaProductHunt size={30} className="m-auto" />,
     label: "Products",
     visible: ["super admin", "support", "admin"],
+    href: "/dashboard/products",
   },
   {
     icon: <MdShoppingCart size={30} className="m-auto" />,
     label: "Orders",
     visible: ["super admin", "admin"],
+    href: "/dashboard/user-info",
   },
   {
     icon: <FaUser size={30} className="m-auto" />,
-    label: "User Info",
+    label: "Profile",
     visible: ["super admin", "support", "admin"],
+    href: "/dashboard/user-info",
   },
   {
     icon: <MdVerifiedUser size={30} className="m-auto" />,
     label: "Permissions",
     visible: ["super admin"],
+    href: "/dashboard/user-info",
   },
   {
     icon: <MdSettings size={30} className="m-auto" />,
     label: "Settings",
     visible: ["super admin", "support", "admin"],
+    href: "/dashboard/user-info",
   },
 ];
 
@@ -49,13 +56,14 @@ const Sidebar = () => {
         {sidebarItems
           .filter((item) => item.visible.includes(user?.role))
           .map((item, index) => (
-            <div
+            <Link
+              href={item.href}
               key={index}
-              className="gap-1 flex flex-col hover:text-red-400 cursor-pointer items-center"
+              className="gap-1 flex flex-col hover:text-green-300 cursor-pointer items-center"
             >
               {item.icon}
               <p>{item.label}</p>
-            </div>
+            </Link>
           ))}
       </div>
     </div>
