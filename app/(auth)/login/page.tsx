@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -13,7 +13,7 @@ const LoginPage = () => {
     password: "",
   });
   const router = useRouter();
-  const { setUser } = useUser();
+  const { setUser, user } = useUser();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -47,6 +47,11 @@ const LoginPage = () => {
       console.error("Error logging in:", error);
     }
   };
+  useEffect(() => {
+    if (user) {
+      router.push("/dashboard");
+    }
+  }, [user]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
