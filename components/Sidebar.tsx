@@ -1,6 +1,6 @@
 import { useUser } from "@/context/UserProvider";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import { AiFillDashboard } from "react-icons/ai";
 import { FaProductHunt, FaUser } from "react-icons/fa";
 import { MdVerifiedUser, MdSettings, MdShoppingCart } from "react-icons/md";
@@ -45,15 +45,15 @@ const sidebarItems = [
 ];
 
 const Sidebar = () => {
-  const { user } = useUser();
-
+  const { user, loading } = useUser();
+  console.log(user,"fdfddf")
   return (
     <div className="bg-slate-800 text-white">
       <div className="bg-red-400 p-2 h-[50px]">
         <p className="text-xl font-semibold">ShopEase</p>
       </div>
       <div className="gap-10 flex flex-col justify-start p-4 items-center">
-        {sidebarItems
+        {!loading && sidebarItems
           .filter((item) => item.visible.includes(user?.role))
           .map((item, index) => (
             <Link

@@ -1,4 +1,6 @@
 "use client";
+import { db } from "@/firebase";
+import { collection, doc, getDoc } from "firebase/firestore";
 import React, {
   createContext,
   useContext,
@@ -25,13 +27,23 @@ const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   useEffect(() => {
-    setLoading(true);
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-      console.log(user);
-    }
-    setLoading(false);
+    const getUser = async () => {
+      setLoading(true);
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        const data = JSON.parse(storedUser);
+        const docRef = doc(db, "members", data.email);
+        const docData = await getDoc(docRef);
+        console.log(docData.data(), "harshit");
+        setUser(docData.data());
+        localStorage.setItem("user", JSON.stringify(docData.data()));
+        console.log(user);
+      }
+
+      setLoading(false);
+    };
+
+    getUser();
   }, []);
 
   return (

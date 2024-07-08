@@ -1,6 +1,7 @@
 "use client";
+import { useUser } from "@/context/UserProvider";
 import { db } from "@/firebase";
-import { doc, updateDoc, collection, QuerySnapshot, getDocs } from "firebase/firestore";
+import { doc, updateDoc, collection, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 
 interface Member {
@@ -9,13 +10,15 @@ interface Member {
   email: string;
   verification: boolean;
   role: string;
-  // Add more fields as needed
 }
 
 const Page: React.FC = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
-  const [filter, setFilter] = useState<"all" | "verified" | "unverified">("all");
+  const [filter, setFilter] = useState<"all" | "verified" | "unverified">(
+    "all"
+  );
+  const { user } = useUser();
 
   useEffect(() => {
     const getMembers = async () => {
@@ -43,13 +46,26 @@ const Page: React.FC = () => {
       const verifiedMembers = members.filter((member) => member.verification);
       setFilteredMembers(verifiedMembers);
     } else if (filter === "unverified") {
-      const unverifiedMembers = members.filter((member) => !member.verification);
+      const unverifiedMembers = members.filter(
+        (member) => !member.verification
+      );
       setFilteredMembers(unverifiedMembers);
     }
   }, [members, filter]);
 
-  const handleToggleVerification = async (memberId: string, currentVerificationStatus: boolean) => {
+  const handleToggleVerification = async (
+    memberId: string,
+    currentVerificationStatus: boolean
+  ) => {
     try {
+      // Check if the current user's email matches the member's email
+      if (
+        user?.email === members.find((member) => member.id === memberId)?.email
+      ) {
+        console.log("You cannot modify your own verification status.");
+        return;
+      }
+
       // Update the verification status of the member in Firestore
       const memberRef = doc(db, "members", memberId);
       await updateDoc(memberRef, {
@@ -58,7 +74,9 @@ const Page: React.FC = () => {
 
       // Update local state to reflect the change
       const updatedMembers = members.map((member) =>
-        member.id === memberId ? { ...member, verification: !currentVerificationStatus } : member
+        member.id === memberId
+          ? { ...member, verification: !currentVerificationStatus }
+          : member
       );
       setMembers(updatedMembers);
       setFilteredMembers(updatedMembers);
@@ -69,6 +87,14 @@ const Page: React.FC = () => {
 
   const handleRoleChange = async (memberId: string, newRole: string) => {
     try {
+      // Check if the current user's email matches the member's email
+      if (
+        user?.email === members.find((member) => member.id === memberId)?.email
+      ) {
+        console.log("You cannot modify your own role.");
+        return;
+      }
+
       // Update the role of the member in Firestore
       const memberRef = doc(db, "members", memberId);
       await updateDoc(memberRef, {
@@ -86,17 +112,21 @@ const Page: React.FC = () => {
     }
   };
 
-  const handleFilterClick = (selectedFilter: "all" | "verified" | "unverified") => {
+  const handleFilterClick = (
+    selectedFilter: "all" | "verified" | "unverified"
+  ) => {
     setFilter(selectedFilter);
   };
 
   return (
-    <div className="flex flex-col">
-      <h1 className="text-2xl font-bold mb-4">Members List</h1>
-      <div className="mb-4">
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Members List</h1>
+      <div className="mb-8">
         <button
           className={`mr-4 ${
-            filter === "all" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-800"
+            filter === "all"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-gray-800"
           } px-4 py-2 rounded-lg`}
           onClick={() => handleFilterClick("all")}
         >
@@ -104,7 +134,9 @@ const Page: React.FC = () => {
         </button>
         <button
           className={`mr-4 ${
-            filter === "verified" ? "bg-green-500 text-white" : "bg-gray-200 text-gray-800"
+            filter === "verified"
+              ? "bg-green-500 text-white"
+              : "bg-gray-200 text-gray-800"
           } px-4 py-2 rounded-lg`}
           onClick={() => handleFilterClick("verified")}
         >
@@ -112,7 +144,9 @@ const Page: React.FC = () => {
         </button>
         <button
           className={`mr-4 ${
-            filter === "unverified" ? "bg-red-500 text-white" : "bg-gray-200 text-gray-800"
+            filter === "unverified"
+              ? "bg-red-500 text-white"
+              : "bg-gray-200 text-gray-800"
           } px-4 py-2 rounded-lg`}
           onClick={() => handleFilterClick("unverified")}
         >
@@ -121,43 +155,44 @@ const Page: React.FC = () => {
       </div>
       <div>
         {filteredMembers.map((member) => (
-          <div key={member.id} className="bg-gray-100 p-4 mb-2 rounded-lg">
-            <p>
-              <strong>Name:</strong> {member.name}
-            </p>
-            <p>
-              <strong>Email:</strong> {member.email}
-            </p>
-            <p>
-              <strong>Verification:</strong>{" "}
-              {member.verification ? "Verified" : "Not Verified"}
-            </p>
-            <p>
-              <strong>Role:</strong> {member.role}
-            </p>
-            <div className="mt-2">
-              <label htmlFor={`role_${member.id}`} className="mr-2 font-semibold">
-                Change Role:
-              </label>
-              <select
-                id={`role_${member.id}`}
-                className="px-2 py-1 border border-gray-300 rounded-md"
-                value={member.role}
-                onChange={(e) => handleRoleChange(member.id, e.target.value)}
+          <div
+            key={member.id}
+            className="bg-white shadow-md rounded-lg p-4 mb-4"
+          >
+            <p className="text-lg font-semibold">{member.name}</p>
+            <p className="text-gray-600">{member.email}</p>
+            <div className="flex items-center mt-2">
+              <div className="flex items-center mr-4">
+                <label
+                  htmlFor={`role_${member.id}`}
+                  className="mr-2 font-semibold"
+                >
+                  Role:
+                </label>
+                <select
+                  id={`role_${member.id}`}
+                  className="px-2 py-1 border border-gray-300 rounded-md"
+                  value={member.role}
+                  onChange={(e) => handleRoleChange(member.id, e.target.value)}
+                >
+                  <option value="support">Support</option>
+                  <option value="admin">Admin</option>
+                  <option value="super admin">Super Admin</option>
+                </select>
+              </div>
+              <button
+                className={`px-4 py-2 rounded-lg ${
+                  member.verification
+                    ? "bg-red-500 text-white"
+                    : "bg-green-500 text-white"
+                }`}
+                onClick={() =>
+                  handleToggleVerification(member.id, member.verification)
+                }
               >
-                <option value="support">Support</option>
-                <option value="admin">Admin</option>
-                <option value="super admin">Super Admin</option>
-              </select>
+                {member.verification ? "Remove" : "Verify"}
+              </button>
             </div>
-            <button
-              className={`px-4 py-2 rounded-lg mt-2 ${
-                member.verification ? "bg-red-500 text-white" : "bg-green-500 text-white"
-              }`}
-              onClick={() => handleToggleVerification(member.id, member.verification)}
-            >
-              {member.verification ? "Unverify" : "Verify"}
-            </button>
           </div>
         ))}
       </div>
