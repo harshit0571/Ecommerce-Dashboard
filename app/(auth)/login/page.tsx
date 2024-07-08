@@ -2,8 +2,9 @@
 
 import React, { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/firebase";
+import { auth, db } from "@/firebase";
 import { useRouter } from "next/navigation";
+import { doc, getDoc } from "firebase/firestore";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -24,17 +25,23 @@ const LoginPage = () => {
     e.preventDefault();
     console.log(formData);
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
-      console.log("User logged in successfully:", userCredential.user);
-      localStorage.setItem("user", JSON.stringify(userCredential.user));
-      router.push("/dashboard");
+      const userDocRef = doc(db, "users", formData.email);
+      const userDoc = await getDoc(userDocRef);
+      console.log(userDoc.data());
+      if (userDoc.exists() && userDoc.data().verification) {
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          formData.email,
+          formData.password
+        );
+        console.log("User logged in successfully:", userCredential.user);
+        localStorage.setItem("user", JSON.stringify(userDoc.data()));
+        router.push("/dashboard");
+      } else {
+        alert("your email is not verified by the admin");
+      }
     } catch (error) {
       console.error("Error logging in:", error);
-      // Handle error (e.g., show error message to user)
     }
   };
 

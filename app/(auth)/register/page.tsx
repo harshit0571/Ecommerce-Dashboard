@@ -12,7 +12,7 @@ const RegisterPage = () => {
     password: "",
     name: "",
     role: "support",
-    verification: "false",
+    verification: false,
   });
   const router = useRouter();
 
@@ -33,7 +33,7 @@ const RegisterPage = () => {
       formData.password
     )
       .then((userCred) => {
-        const ref = doc(db, "users", userCred.user.uid);
+        const ref = doc(db, "users", formData.email);
         setDoc(ref, formData);
         console.log(userCred.user, "user", "r");
         router.push("/login");
