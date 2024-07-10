@@ -24,7 +24,7 @@ const layout = ({
   return (
     <div className="flex h-screen w-full">
       <Sidebar />
-      {children}
+      <div className="h-full overflow-auto w-full">{children}</div>
     </div>
   );
 };

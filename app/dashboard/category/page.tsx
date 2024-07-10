@@ -1,7 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { db } from "@/firebase"; // Ensure you have the Firebase config and initialization
-import { collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 
 interface Category {
   id: string;
@@ -64,8 +70,10 @@ const CategoryForm: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold mb-6 text-center text-gray-800">Category Management</h1>
+    <div className="container m-auto px-4 py-8 w-full">
+      <h1 className="text-4xl font-bold mb-6 text-center text-gray-800">
+        Category Management
+      </h1>
       <form onSubmit={handleAddCategory} className="mb-8 max-w-lg mx-auto">
         <div className="mb-4">
           <label
@@ -90,14 +98,18 @@ const CategoryForm: React.FC = () => {
           Add Category
         </button>
       </form>
-      <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">Categories</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">
+        Categories
+      </h2>
       <ul className="list-disc list-inside max-w-lg mx-auto bg-white shadow-lg rounded-lg p-4">
         {categories.map((category) => (
           <li
             key={category.id}
             className="flex justify-between items-center bg-gray-100 p-3 mb-2 rounded-lg shadow-md"
           >
-            <span className="text-lg font-medium text-gray-800">{category.name}</span>
+            <span className="text-lg font-medium text-gray-800">
+              {category.name}
+            </span>
             <button
               onClick={() => handleDeleteCategory(category.id)}
               className="ml-4 px-3 py-1 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"

@@ -27,7 +27,7 @@ const UserInfo = () => {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-8 w-max">
       <div className="bg-white p-6 rounded-lg shadow-lg">
         <div className="flex items-center mb-6">
           <FaUserCircle size={60} className="text-gray-400 mr-4" />
