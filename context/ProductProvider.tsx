@@ -42,7 +42,7 @@ export const useProducts = () => {
   return useContext(ProductContext);
 };
 
-const UserProvider = ({ children }: { children: ReactNode }) => {
+const ProductProvider = ({ children }: { children: ReactNode }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -91,4 +91,4 @@ const UserProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export { UserProvider };
+export { ProductProvider };
