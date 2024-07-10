@@ -1,3 +1,5 @@
+import { useProducts } from "@/context/ProductProvider";
+
 interface Product {
   id: string;
   label: string;
@@ -10,7 +12,13 @@ interface Product {
   date: string;
 }
 
-const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
+const ProductCard: React.FC<{ product: Product; listed: boolean }> = ({
+  product,
+  listed,
+}) => 
+  {
+    const {deleteProduct}=useProducts();
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <img
@@ -30,7 +38,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
           </span>
         </div>
         <div className="flex justify-start gap-3 mt-2">
-          <button className="block  bg-red-400 p-1  px-3 rounded-lg text-center text-white hover:underline">
+          <button className="block  bg-red-400 p-1  px-3 rounded-lg text-center text-white hover:underline" onClick={()=>deleteProduct(product.id)}>
             Delete
           </button>
           <button className="block  bg-slate-400 p-1 px-3 rounded-lg text-center text-white hover:underline">
@@ -42,4 +50,4 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   );
 };
 
-export default ProductCard
+export default ProductCard;

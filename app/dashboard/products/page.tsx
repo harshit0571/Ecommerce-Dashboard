@@ -1,7 +1,5 @@
 "use client";
-import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
-import { db } from "@/firebase";
-import { addDoc, collection, getDocs, doc, getDoc } from "firebase/firestore";
+import React from "react";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 import { useProducts } from "@/context/ProductProvider";
@@ -45,7 +43,7 @@ const AddProduct: React.FC = () => {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-8">
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product.id} product={product} listed={true}/>
         ))}
       </div>
     </div>
