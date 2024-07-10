@@ -2,6 +2,7 @@
 import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import { db } from "@/firebase";
 import { addDoc, collection, getDocs } from "firebase/firestore";
+import { useUser } from "@/context/UserProvider";
 
 interface Product {
   label: string;
@@ -25,13 +26,7 @@ const AddProduct: React.FC = () => {
   const [price, setPrice] = useState<number | "">("");
   const [images, setImages] = useState<string[]>([""]);
   const [description, setDescription] = useState<string>("");
-  const [categories] = useState<string[]>([
-    "Electronics",
-    "Books",
-    "Clothing",
-    "Sports",
-    "Furniture",
-  ]);
+  const { user } = useUser();
 
   const handleCategoryChange = (e: ChangeEvent<HTMLInputElement>) => {
     const categoryId = e.target.value;
@@ -54,6 +49,7 @@ const AddProduct: React.FC = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    console.log("hey");
     try {
       const product: Product = {
         label,
@@ -63,8 +59,9 @@ const AddProduct: React.FC = () => {
         images: images.filter((url) => url), // Filter out empty strings
         description,
         date: new Date().toISOString(),
-        listed: false,
+        listed: user?.role === "support" ? false : true,
       };
+      console.log(product, "harshit");
       await addDoc(collection(db, "products"), product);
       setLabel("");
       setCategory([]);

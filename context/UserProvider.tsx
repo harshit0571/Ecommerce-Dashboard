@@ -37,7 +37,7 @@ const UserProvider = ({ children }: { children: ReactNode }) => {
         console.log(docData.data(), "harshit");
         setUser(docData.data());
         localStorage.setItem("user", JSON.stringify(docData.data()));
-        console.log(user);
+        console.log("user called");
       }
 
       setLoading(false);
