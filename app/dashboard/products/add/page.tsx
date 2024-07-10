@@ -3,6 +3,7 @@ import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import { db } from "@/firebase";
 import { addDoc, collection, getDocs } from "firebase/firestore";
 import { useUser } from "@/context/UserProvider";
+import { useProducts } from "@/context/ProductProvider";
 
 interface Product {
   label: string;
@@ -18,6 +19,19 @@ interface Category {
   id: string;
   name: string;
 }
+
+interface ProductContextType {
+  id: string;
+  label: string;
+  category: string[];
+  stock: number;
+  price: number;
+  images: string[];
+  description: string;
+  listed: boolean;
+  date: string;
+}
+
 
 const AddProduct: React.FC = () => {
   const [label, setLabel] = useState<string>("");
@@ -47,6 +61,7 @@ const AddProduct: React.FC = () => {
     setImages([...images, ""]);
   };
 
+  const { setProducts } = useProducts();
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     console.log("hey");
@@ -62,7 +77,11 @@ const AddProduct: React.FC = () => {
         listed: user?.role === "support" ? false : true,
       };
       console.log(product, "harshit");
-      await addDoc(collection(db, "products"), product);
+      await addDoc(collection(db, "products"), product).then((docRef) => {
+        const newProduct: ProductContextType = { ...product, id: docRef.id };
+        setProducts((prevProducts:ProductContextType[]) => [...prevProducts, newProduct]);
+      });
+
       setLabel("");
       setCategory([]);
       setStock("");

@@ -15,7 +15,7 @@ import React, {
   useEffect,
 } from "react";
 
-interface Product {
+interface ProductContextType {
   id: string;
   label: string;
   category: string[];
@@ -28,8 +28,8 @@ interface Product {
 }
 
 interface ProductContext {
-  products: Product[];
-  setProducts: (products: Product[]) => void;
+  products: ProductContextType[];
+  setProducts: (products: ProductContextType[]) => void;
   loading: boolean;
   deleteProduct: (docId: string) => void;
 }
@@ -51,7 +51,7 @@ export const useProducts = () => {
 };
 
 const ProductProvider = ({ children }: { children: ReactNode }) => {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductContextType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const getProducts = async () => {
     setLoading(true);
@@ -88,7 +88,6 @@ const ProductProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const deleteProduct = async (docId: string) => {
-    console.log(docId);
     try {
       await deleteDoc(doc(db, "products", docId)).then(() => {
         setProducts(products.filter((product) => product.id !== docId));
@@ -99,7 +98,9 @@ const ProductProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  
+
+
+
 
   useEffect(() => {
     getProducts();
