@@ -26,21 +26,7 @@ interface Category {
 
 const AddProduct: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]); // State to hold products
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "categories"));
-        const categoriesData: Category[] = [];
-        querySnapshot.forEach((doc) => {
-          categoriesData.push({ id: doc.id, name: doc.data().name });
-        });
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
 
-    fetchCategories();
-  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
