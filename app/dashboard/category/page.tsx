@@ -1,126 +1,122 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { db } from "@/firebase"; // Ensure you have the Firebase config and initialization
-import {
-  collection,
-  addDoc,
-  getDocs,
-  deleteDoc,
-  doc,
-} from "firebase/firestore";
+import React, { useState } from "react";
 
-interface Category {
-  id: string;
-  name: string;
-}
+const initialCategories = [
+  {
+    name: "Electronics",
+    subcategories: ["Mobile Phones", "Laptops", "Cameras"],
+  },
+  {
+    name: "Books",
+    subcategories: ["Fiction", "Non-Fiction", "Comics"],
+  },
+  {
+    name: "Clothing",
+    subcategories: ["Men's Clothing", "Women's Clothing", "Kids' Clothing"],
+  },
+  {
+    name: "Home Appliances",
+    subcategories: [
+      "Kitchen Appliances",
+      "Cleaning Appliances",
+      "Cooling Appliances",
+    ],
+  },
+  {
+    name: "Toys",
+    subcategories: ["Action Figures", "Dolls", "Educational Toys"],
+  },
+];
 
-const CategoryForm: React.FC = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [categoryName, setCategoryName] = useState("");
+const Page = () => {
+  const [categories, setCategories] = useState(initialCategories);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "categories"));
-        const categoriesData: Category[] = [];
-        querySnapshot.forEach((doc) => {
-          categoriesData.push({ id: doc.id, name: doc.data().name });
-        });
-        setCategories(categoriesData);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
-  const handleCategoryNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCategoryName(e.target.value);
+  const toggleSubcategories = (categoryName: string) => {
+    setExpandedCategory(
+      expandedCategory === categoryName ? null : categoryName
+    );
   };
 
-  const handleAddCategory = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (categoryName.trim() === "") return;
-
-    try {
-      const docRef = await addDoc(collection(db, "categories"), {
-        name: categoryName.trim(),
-      });
-
-      const newCategory: Category = {
-        id: docRef.id,
-        name: categoryName.trim(),
-      };
-
-      setCategories([...categories, newCategory]);
-      setCategoryName("");
-    } catch (error) {
-      console.error("Error adding category:", error);
-    }
-  };
-
-  const handleDeleteCategory = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, "categories", id));
-      setCategories(categories.filter((category) => category.id !== id));
-    } catch (error) {
-      console.error("Error deleting category:", error);
-    }
+  const handleSelect = (categoryName: string) => {
+    setSelectedCategory(categoryName);
+    setDropdownOpen(false);
   };
 
   return (
-    <div className="container m-auto px-4 py-8 w-full">
-      <h1 className="text-4xl font-bold mb-6 text-center text-gray-800">
-        Category Management
-      </h1>
-      <form onSubmit={handleAddCategory} className="mb-8 max-w-lg mx-auto">
-        <div className="mb-4">
-          <label
-            htmlFor="categoryName"
-            className="block text-lg font-medium text-gray-700"
-          >
-            Category Name
-          </label>
+    <div className="bg-gray-50 min-h-screen flex flex-col items-center py-10">
+      <div className="bg-white p-8 rounded shadow-md w-full max-w-2xl mb-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-6">Add Category</h1>
+        <div className="flex mb-6">
           <input
             type="text"
-            id="categoryName"
-            value={categoryName}
-            onChange={handleCategoryNameChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="flex-grow p-4 border border-gray-300 rounded-l-lg focus:outline-none "
             placeholder="Enter category name"
           />
-        </div>
-        <button
-          type="submit"
-          className="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        >
-          Add Category
-        </button>
-      </form>
-      <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">
-        Categories
-      </h2>
-      <ul className="list-disc list-inside max-w-lg mx-auto bg-white shadow-lg rounded-lg p-4">
-        {categories.map((category) => (
-          <li
-            key={category.id}
-            className="flex justify-between items-center bg-gray-100 p-3 mb-2 rounded-lg shadow-md"
-          >
-            <span className="text-lg font-medium text-gray-800">
-              {category.name}
-            </span>
+          <div className="relative flex-grow">
             <button
-              onClick={() => handleDeleteCategory(category.id)}
-              className="ml-4 px-3 py-1 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
+              className="w-full p-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700 text-left"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
             >
-              Delete
+              {selectedCategory || "Select a category"}
             </button>
-          </li>
-        ))}
-      </ul>
+            {dropdownOpen && (
+              <ul className="absolute w-full bg-white border border-gray-300 rounded mt-1 z-10 max-h-60 overflow-y-auto">
+                <li
+                  className="p-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleSelect("no parent")}
+                >
+                  no parent
+                </li>
+                {categories.map((category, index) => (
+                  <li
+                    key={index}
+                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleSelect(category.name)}
+                  >
+                    {category.name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <button className="p-4 bg-slate-700 text-white rounded-r-lg hover:bg-slate-700 transition duration-300">
+            Add Category
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white p-8 rounded shadow-md w-full max-w-2xl">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">
+          Demo Categories
+        </h2>
+        <ul className="list-none">
+          {categories.map((category, index) => (
+            <li key={index} className="mb-4">
+              <div
+                className="flex justify-between items-center cursor-pointer text-gray-700 hover:text-gray-900 font-medium text-lg"
+                onClick={() => toggleSubcategories(category.name)}
+              >
+                <span>{category.name}</span>
+                <span>{expandedCategory === category.name ? "-" : "+"}</span>
+              </div>
+              {expandedCategory === category.name && (
+                <ul className="ml-6 mt-2 list-disc transition-all duration-300 ease-in-out">
+                  {category.subcategories.map((subcategory, subIndex) => (
+                    <li key={subIndex} className="text-gray-600">
+                      {subcategory}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };
 
-export default CategoryForm;
+export default Page;

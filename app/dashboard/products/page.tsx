@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 import { useProducts } from "@/context/ProductProvider";
@@ -21,16 +21,29 @@ interface Category {
   name: string;
 }
 
-const AddProduct: React.FC = () => {
-  const { products, setProducts } = useProducts();
+const ProductList: React.FC = () => {
+  const { products } = useProducts();
+  const [displayProducts, setDisplayProducts] = useState<Product[]>([]);
+  const [showListed, setShowListed] = useState(true);
+
+  useEffect(() => {
+    setDisplayProducts(products.filter((prod) => prod.listed === showListed));
+  }, [products, showListed]);
 
   return (
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded shadow-md">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800 ">Listed Product</h1>
+        <h1 className="text-2xl font-bold text-gray-800 ">
+          {showListed ? "Listed Products" : "Unlisted Products"}
+        </h1>
         <div className="flex gap-3">
-          <button className="block  bg-green-400 p-2 rounded-lg text-center text-white hover:underline">
-            Unlisted products
+          <button
+            className={`block p-2 rounded-lg text-center text-white ${
+              showListed ? "bg-red-400" : "bg-green-400"
+            } hover:underline`}
+            onClick={() => setShowListed(!showListed)}
+          >
+            {showListed ? "Show Unlisted Products" : "Show Listed Products"}
           </button>
           <Link
             href="products/add"
@@ -42,12 +55,16 @@ const AddProduct: React.FC = () => {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-8">
-        {products.filter(prod=>prod.listed).map((product) => (
-          <ProductCard key={product.id} product={product} listed={true} />
+        {displayProducts.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            listed={product.listed}
+          />
         ))}
       </div>
     </div>
   );
 };
 
-export default AddProduct;
+export default ProductList;
