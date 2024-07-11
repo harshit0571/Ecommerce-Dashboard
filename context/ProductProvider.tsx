@@ -6,6 +6,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  updateDoc,
 } from "firebase/firestore";
 import React, {
   createContext,
@@ -32,6 +33,7 @@ interface ProductContext {
   setProducts: (products: ProductContextType[]) => void;
   loading: boolean;
   deleteProduct: (docId: string) => void;
+  toggleListing: (docId: string, listingStatus: boolean) => void;
 }
 
 interface Category {
@@ -44,6 +46,7 @@ const ProductContext = createContext<ProductContext>({
   setProducts: () => {},
   loading: true,
   deleteProduct: () => {},
+  toggleListing: () => {},
 });
 
 export const useProducts = () => {
@@ -57,10 +60,10 @@ const ProductProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       const querySnapshot = await getDocs(collection(db, "products"));
-      const productsData: Product[] = [];
+      const productsData: ProductContextType[] = [];
 
       for (const Doc of querySnapshot.docs) {
-        const productData = Doc.data() as Product;
+        const productData = Doc.data() as ProductContextType;
         productData.id = Doc.id;
 
         const categories: string[] = [];
@@ -98,9 +101,23 @@ const ProductProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-
-
-
+  const toggleListing = async (docId: string, listingStatus: boolean) => {
+    try {
+      const docRef = doc(db, "products", docId);
+      await updateDoc(docRef, {
+        listed: !listingStatus,
+      });
+      setProducts((prevProducts) =>
+        prevProducts.map((product) =>
+          product.id === docId
+            ? { ...product, listed: !listingStatus }
+            : product
+        )
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     getProducts();
@@ -108,7 +125,7 @@ const ProductProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <ProductContext.Provider
-      value={{ setProducts, products, loading, deleteProduct }}
+      value={{ setProducts, products, loading, deleteProduct, toggleListing }}
     >
       {children}
     </ProductContext.Provider>

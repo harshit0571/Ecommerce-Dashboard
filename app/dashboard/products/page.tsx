@@ -30,7 +30,7 @@ const AddProduct: React.FC = () => {
         <h1 className="text-2xl font-bold text-gray-800 ">Listed Product</h1>
         <div className="flex gap-3">
           <button className="block  bg-green-400 p-2 rounded-lg text-center text-white hover:underline">
-            Requests
+            Unlisted products
           </button>
           <Link
             href="products/add"
@@ -42,8 +42,8 @@ const AddProduct: React.FC = () => {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-8">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} listed={true}/>
+        {products.filter(prod=>prod.listed).map((product) => (
+          <ProductCard key={product.id} product={product} listed={true} />
         ))}
       </div>
     </div>

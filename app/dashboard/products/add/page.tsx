@@ -4,6 +4,7 @@ import { db } from "@/firebase";
 import { addDoc, collection, getDocs } from "firebase/firestore";
 import { useUser } from "@/context/UserProvider";
 import { useProducts } from "@/context/ProductProvider";
+import { useRouter } from "next/navigation";
 
 interface Product {
   label: string;
@@ -32,7 +33,6 @@ interface ProductContextType {
   date: string;
 }
 
-
 const AddProduct: React.FC = () => {
   const [label, setLabel] = useState<string>("");
   const [category, setCategory] = useState<string[]>([]);
@@ -41,7 +41,7 @@ const AddProduct: React.FC = () => {
   const [images, setImages] = useState<string[]>([""]);
   const [description, setDescription] = useState<string>("");
   const { user } = useUser();
-
+  const router = useRouter();
   const handleCategoryChange = (e: ChangeEvent<HTMLInputElement>) => {
     const categoryId = e.target.value;
     console.log(categoryId);
@@ -79,7 +79,10 @@ const AddProduct: React.FC = () => {
       console.log(product, "harshit");
       await addDoc(collection(db, "products"), product).then((docRef) => {
         const newProduct: ProductContextType = { ...product, id: docRef.id };
-        setProducts((prevProducts:ProductContextType[]) => [...prevProducts, newProduct]);
+        setProducts((prevProducts: ProductContextType[]) => [
+          ...prevProducts,
+          newProduct,
+        ]);
       });
 
       setLabel("");
@@ -89,6 +92,7 @@ const AddProduct: React.FC = () => {
       setImages([""]);
       setDescription("");
       alert("Product added successfully!");
+      router.push("/dashboard/products");
     } catch (error) {
       console.error("Error adding product: ", error);
       alert("Error adding product");

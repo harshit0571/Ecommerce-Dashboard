@@ -62,7 +62,7 @@ const Page: React.FC = () => {
       if (
         user?.email === members.find((member) => member.id === memberId)?.email
       ) {
-        console.log("You cannot modify your own verification status.");
+        alert("You cannot modify your own verification status.");
         return;
       }
 

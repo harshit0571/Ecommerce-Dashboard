@@ -15,9 +15,8 @@ interface Product {
 const ProductCard: React.FC<{ product: Product; listed: boolean }> = ({
   product,
   listed,
-}) => 
-  {
-    const {deleteProduct}=useProducts();
+}) => {
+  const { deleteProduct, toggleListing } = useProducts();
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -38,12 +37,31 @@ const ProductCard: React.FC<{ product: Product; listed: boolean }> = ({
           </span>
         </div>
         <div className="flex justify-start gap-3 mt-2">
-          <button className="block  bg-red-400 p-1  px-3 rounded-lg text-center text-white hover:underline" onClick={()=>deleteProduct(product.id)}>
+          <button
+            className="block  bg-red-400 p-1  px-3 rounded-lg text-center text-white hover:underline"
+            onClick={() => deleteProduct(product.id)}
+          >
             Delete
           </button>
-          <button className="block  bg-slate-400 p-1 px-3 rounded-lg text-center text-white hover:underline">
-            Unlist Product
-          </button>
+          {product.listed ? (
+            <button
+              className="block  bg-slate-400 p-1 px-3 rounded-lg text-center text-white hover:underline"
+              onClick={() => {
+                toggleListing(product.id, true);
+              }}
+            >
+              Unlist Product
+            </button>
+          ) : (
+            <button
+              className="block  bg-green-400 p-1 px-3 rounded-lg text-center text-white hover:underline"
+              onClick={() => {
+                toggleListing(product.id, false);
+              }}
+            >
+              List Product
+            </button>
+          )}
         </div>
       </div>
     </div>
