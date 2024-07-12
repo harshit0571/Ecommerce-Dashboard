@@ -1,38 +1,48 @@
 "use client";
-import React, { useState } from "react";
+import { db } from "@/firebase";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
 
-const initialCategories = [
-  {
-    name: "Electronics",
-    subcategories: ["Mobile Phones", "Laptops", "Cameras"],
-  },
-  {
-    name: "Books",
-    subcategories: ["Fiction", "Non-Fiction", "Comics"],
-  },
-  {
-    name: "Clothing",
-    subcategories: ["Men's Clothing", "Women's Clothing", "Kids' Clothing"],
-  },
-  {
-    name: "Home Appliances",
-    subcategories: [
-      "Kitchen Appliances",
-      "Cleaning Appliances",
-      "Cooling Appliances",
-    ],
-  },
-  {
-    name: "Toys",
-    subcategories: ["Action Figures", "Dolls", "Educational Toys"],
-  },
-];
+interface Category {
+  name: string;
+  subcategories: string[];
+}
 
-const Page = () => {
-  const [categories, setCategories] = useState(initialCategories);
+const Page: React.FC = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [category, setCategory] = useState("");
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const categoriesCollection = collection(db, "categories");
+      const categorySnapshot = await getDocs(categoriesCollection);
+      const categoryList: Category[] = [];
+      for (const doc of categorySnapshot.docs) {
+        const subcategoriesCollection = collection(
+          db,
+          "categories",
+          doc.data().name,
+          "subcategories"
+        );
+        const subcategorySnapshot = await getDocs(subcategoriesCollection);
+        const subcategories = subcategorySnapshot.docs.map(
+          (subDoc) => subDoc.data().name as string
+        );
+        categoryList.push({ name: doc.data().name as string, subcategories });
+      }
+      setCategories(categoryList);
+      console.log(categoryList, "d");
+    } catch (error) {
+      console.error("Error fetching categories: ", error);
+    }
+  };
 
   const toggleSubcategories = (categoryName: string) => {
     setExpandedCategory(
@@ -45,6 +55,39 @@ const Page = () => {
     setDropdownOpen(false);
   };
 
+  const addCategory = async () => {
+    if (!selectedCategory) {
+      alert("Please select a parent category");
+      return;
+    }
+    if (category === "") {
+      alert("Please enter a category name");
+      return;
+    }
+
+    try {
+      if (selectedCategory === "no parent") {
+        const ref = collection(db, "categories");
+        await addDoc(ref, { name: category });
+      } else {
+        const ref = collection(
+          db,
+          "categories",
+          selectedCategory,
+          "subcategories"
+        );
+        await addDoc(ref, { name: category });
+      }
+      alert("Category added successfully");
+      setCategory("");
+      setSelectedCategory(null);
+      fetchCategories(); // Refresh categories after adding a new one
+    } catch (error) {
+      console.error("Error adding category: ", error);
+      alert("Error adding category: " + (error as Error).message);
+    }
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col items-center py-10">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-2xl mb-8">
@@ -52,8 +95,10 @@ const Page = () => {
         <div className="flex mb-6">
           <input
             type="text"
-            className="flex-grow p-4 border border-gray-300 rounded-l-lg focus:outline-none "
+            className="flex-grow p-4 border border-gray-300 rounded-l-lg focus:outline-none"
             placeholder="Enter category name"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
           />
           <div className="relative flex-grow">
             <button
@@ -68,7 +113,7 @@ const Page = () => {
                   className="p-2 hover:bg-gray-100 cursor-pointer"
                   onClick={() => handleSelect("no parent")}
                 >
-                  no parent
+                  No parent
                 </li>
                 {categories.map((category, index) => (
                   <li
@@ -82,16 +127,17 @@ const Page = () => {
               </ul>
             )}
           </div>
-          <button className="p-4 bg-slate-700 text-white rounded-r-lg hover:bg-slate-700 transition duration-300">
+          <button
+            className="p-4 bg-slate-700 text-white rounded-r-lg hover:bg-slate-700 transition duration-300"
+            onClick={addCategory}
+          >
             Add Category
           </button>
         </div>
       </div>
 
       <div className="bg-white p-8 rounded shadow-md w-full max-w-2xl">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">
-          Demo Categories
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Categories</h2>
         <ul className="list-none">
           {categories.map((category, index) => (
             <li key={index} className="mb-4">
