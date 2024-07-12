@@ -1,6 +1,6 @@
 "use client";
 import { db } from "@/firebase";
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { addDoc, collection, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 
 interface Category {
@@ -38,7 +38,6 @@ const Page: React.FC = () => {
         categoryList.push({ name: doc.data().name as string, subcategories });
       }
       setCategories(categoryList);
-      console.log(categoryList, "d");
     } catch (error) {
       console.error("Error fetching categories: ", error);
     }
@@ -89,26 +88,26 @@ const Page: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen flex flex-col items-center py-10">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-2xl mb-8">
+    <div className="bg-gray-100 min-h-screen flex flex-col items-center py-10 font-sans">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-xl mb-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">Add Category</h1>
-        <div className="flex mb-6">
+        <div className="flex flex-col space-y-4">
           <input
             type="text"
-            className="flex-grow p-4 border border-gray-300 rounded-l-lg focus:outline-none"
+            className="p-4 border border-gray-300 rounded-lg focus:outline-none"
             placeholder="Enter category name"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           />
-          <div className="relative flex-grow">
+          <div className="relative">
             <button
-              className="w-full p-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700 text-left"
+              className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none bg-white text-gray-700 text-left"
               onClick={() => setDropdownOpen(!dropdownOpen)}
             >
               {selectedCategory || "Select a category"}
             </button>
             {dropdownOpen && (
-              <ul className="absolute w-full bg-white border border-gray-300 rounded mt-1 z-10 max-h-60 overflow-y-auto">
+              <ul className="absolute w-full bg-white border border-gray-300 rounded-lg mt-1 z-10 max-h-60 overflow-y-auto">
                 <li
                   className="p-2 hover:bg-gray-100 cursor-pointer"
                   onClick={() => handleSelect("no parent")}
@@ -128,7 +127,7 @@ const Page: React.FC = () => {
             )}
           </div>
           <button
-            className="p-4 bg-slate-700 text-white rounded-r-lg hover:bg-slate-700 transition duration-300"
+            className="w-full p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
             onClick={addCategory}
           >
             Add Category
@@ -136,20 +135,20 @@ const Page: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-2xl">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-xl">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Categories</h2>
         <ul className="list-none">
           {categories.map((category, index) => (
             <li key={index} className="mb-4">
               <div
-                className="flex justify-between items-center cursor-pointer text-gray-700 hover:text-gray-900 font-medium text-lg"
+                className="flex justify-between items-center cursor-pointer text-gray-700 hover:text-gray-900 font-medium"
                 onClick={() => toggleSubcategories(category.name)}
               >
                 <span>{category.name}</span>
                 <span>{expandedCategory === category.name ? "-" : "+"}</span>
               </div>
               {expandedCategory === category.name && (
-                <ul className="ml-6 mt-2 list-disc transition-all duration-300 ease-in-out">
+                <ul className="ml-4 mt-2 list-disc">
                   {category.subcategories.map((subcategory, subIndex) => (
                     <li key={subIndex} className="text-gray-600">
                       {subcategory}
