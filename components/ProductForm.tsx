@@ -5,7 +5,16 @@ import { MdCancel } from "react-icons/md";
 
 const ProductForm = () => {
   const [showAddButton, setShowAddButton] = useState(false);
-  const [ImagesStore, setImagesStore] = useState([]);
+  const [ImagesStore, setImagesStore] = useState<string[]>([]);
+  const [imageUrlVal, setImageUrlVal] = useState("");
+  const [displayImage, setDisplayImage] = useState(0);
+
+  const handleImagesAdd = (imageurl: string) => {
+    setImagesStore((images) => [...images, imageurl]);
+    console.log(ImagesStore);
+    setShowAddButton(false);
+    setImageUrlVal("");
+  };
   return (
     <div className="flex px-10 mt-8 gap-5">
       <div className="w-[70%] bg-neutral-100 rounded-lg flex flex-col p-3 gap-5">
@@ -31,8 +40,15 @@ const ProductForm = () => {
                 type="text"
                 className="bg-white p-2 ring-black ring-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                 placeholder="add image url"
+                value={imageUrlVal}
+                onChange={(e) => {
+                  setImageUrlVal(e.target.value);
+                }}
               />
-              <button className="p-2 mt-3 w-full bg-slate-700 text-white font-semibold h-max rounded-full ">
+              <button
+                className="p-2 mt-3 w-full bg-slate-700 text-white font-semibold h-max rounded-full "
+                onClick={() => handleImagesAdd(imageUrlVal)}
+              >
                 Add image
               </button>
               <button
@@ -45,8 +61,26 @@ const ProductForm = () => {
               </button>
             </div>
           )}
-          <div className="w-full h-[250px] bg-neutral-200 rounded-md"></div>
+          <div className="w-full h-[250px] bg-neutral-200 rounded-md">
+            <img
+              src={ImagesStore.length > 0 ? ImagesStore[displayImage] : ""}
+              className="w-full h-full"
+            />
+          </div>
           <div className="flex gap-2 overflow-auto w-full">
+            {ImagesStore.map((image, index) => (
+              <div
+                className={
+                  "bg-neutral-100 h-[50px] w-[50px] rounded-md flex justify-center items-center hover:bg-neutral-300 cursor-pointer " +
+                  (index === displayImage && "border-black border-2 ")
+                }
+                onClick={() => {
+                  setDisplayImage(index);
+                }}
+              >
+                <img src={image} className="w-full h-full" />
+              </div>
+            ))}
             <div
               className="bg-neutral-100 h-[50px] w-[50px] rounded-md flex justify-center items-center hover:bg-neutral-300 cursor-pointer border-dotted border-2 border-slate-400"
               onClick={() => {
