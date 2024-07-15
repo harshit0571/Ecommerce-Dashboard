@@ -1,7 +1,14 @@
 "use client";
-import React, { useState } from "react";
+import { db } from "@/firebase";
+import { collection, getDocs } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
 import { FaPlusCircle } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
+
+interface Category {
+  name: string;
+  subcategories: string[];
+}
 
 const ProductForm = () => {
   const [showAddButton, setShowAddButton] = useState(false);
@@ -11,6 +18,37 @@ const ProductForm = () => {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [stock, setStock] = useState<{ [size: string]: number }>({});
   const [gender, setGender] = useState("");
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedParentCategory, setSelectedParentCategory] = useState("");
+  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const categoriesCollection = collection(db, "categories");
+      const categorySnapshot = await getDocs(categoriesCollection);
+      const categoryList: Category[] = [];
+      for (const doc of categorySnapshot.docs) {
+        const subcategoriesCollection = collection(
+          db,
+          "categories",
+          doc.data().name,
+          "subcategories"
+        );
+        const subcategorySnapshot = await getDocs(subcategoriesCollection);
+        const subcategories = subcategorySnapshot.docs.map(
+          (subDoc) => subDoc.data().name as string
+        );
+        categoryList.push({ name: doc.data().name as string, subcategories });
+      }
+      setCategories(categoryList);
+    } catch (error) {
+      console.error("Error fetching categories: ", error);
+    }
+  };
 
   const handleImagesAdd = (imageurl: string) => {
     setImagesStore((images) => [...images, imageurl]);
@@ -28,10 +66,18 @@ const ProductForm = () => {
     setStock((prevStock) => ({ ...prevStock, [size]: quantity }));
   };
 
+  const handleSubcategoryChange = (subcategory: string) => {
+    setSelectedSubcategories((prevSubcategories) =>
+      prevSubcategories.includes(subcategory)
+        ? prevSubcategories.filter((sub) => sub !== subcategory)
+        : [...prevSubcategories, subcategory]
+    );
+  };
+
   return (
     <div className="flex px-10 mt-8 gap-5 pb-5">
       <div className="w-[70%] rounded-lg flex h-max flex-col gap-5">
-        <div className="flex-col p-3 gap-5 bg-neutral-100  rounded-lg flex">
+        <div className="flex-col p-3 gap-5 bg-neutral-100 rounded-lg flex">
           <h1 className="text-lg font-semibold">General Information</h1>
           <div className="flex flex-col gap-1">
             <p>Name Product</p>
@@ -92,12 +138,14 @@ const ProductForm = () => {
                 <input
                   type="number"
                   className="bg-neutral-200 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                  min={0}
                 />
               </div>
               <div className="flex flex-col flex-grow gap-1">
                 <p>Discount</p>
                 <input
                   type="number"
+                  min={0}
                   className="bg-neutral-200 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </div>
@@ -115,6 +163,7 @@ const ProductForm = () => {
                     }
                     className="bg-neutral-200 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-black flex-grow"
                     placeholder={`Stock for ${size}`}
+                    min={0}
                   />
                 </div>
               ))}
@@ -122,61 +171,100 @@ const ProductForm = () => {
           </div>
         </div>
       </div>
-      <div className="w-[30%] h-max bg-neutral-100 rounded-lg flex flex-col p-3 gap-5">
-        <h1 className="text-lg font-semibold">Upload Images</h1>
-        <div className="flex flex-col gap-3 relative">
-          {showAddButton && (
-            <div className="absolute flex flex-col z-50 justify-center items-center bg-neutral-300 p-3 rounded-xl bottom-0 w-full transition-all duration-150">
-              <input
-                type="text"
-                className="bg-white w-full p-2 ring-black ring-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                placeholder="add image url"
-                value={imageUrlVal}
-                onChange={(e) => {
-                  setImageUrlVal(e.target.value);
-                }}
-              />
-              <button
-                className="p-2 mt-3 w-full bg-slate-700 text-white font-semibold h-max rounded-full "
-                onClick={() => handleImagesAdd(imageUrlVal)}
-              >
-                Add image
-              </button>
-              <button
-                className=" w-max h-max rounded-full font-semibold text-red-500 "
-                onClick={() => {
-                  setShowAddButton(false);
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          )}
-          <div className="w-full h-[250px] bg-neutral-200 rounded-md">
-            <img
-              src={ImagesStore.length > 0 ? ImagesStore[displayImage] : ""}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="flex gap-2 overflow-auto w-full">
-            {ImagesStore.map((image, index) => (
-              <div
-                key={index}
-                className={`bg-neutral-100 h-[50px] w-[50px] rounded-md flex justify-center items-center hover:bg-neutral-300 cursor-pointer ${
-                  index === displayImage ? "border-black border-2" : ""
-                }`}
-                onClick={() => setDisplayImage(index)}
-              >
-                <img src={image} className="w-full h-full object-cover" />
+      <div className="w-[30%] h-max rounded-lg flex flex-col gap-5">
+        <div className="bg-neutral-100 rounded-lg flex flex-col w-full p-3 gap-5">
+          <h1 className="text-lg font-semibold">Upload Images</h1>
+          <div className="flex flex-col gap-3 relative">
+            {showAddButton && (
+              <div className="absolute flex flex-col z-50 justify-center items-center bg-neutral-300 p-3 rounded-xl bottom-0 w-full transition-all duration-150">
+                <input
+                  type="text"
+                  className="bg-white w-full p-2 ring-black ring-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                  placeholder="add image url"
+                  value={imageUrlVal}
+                  onChange={(e) => {
+                    setImageUrlVal(e.target.value);
+                  }}
+                />
+                <button
+                  className="p-2 mt-3 w-full bg-slate-700 text-white font-semibold h-max rounded-full "
+                  onClick={() => handleImagesAdd(imageUrlVal)}
+                >
+                  Add image
+                </button>
+                <button
+                  className=" w-max h-max rounded-full font-semibold text-red-500 "
+                  onClick={() => {
+                    setShowAddButton(false);
+                  }}
+                >
+                  Cancel
+                </button>
               </div>
-            ))}
-            <div
-              className="bg-neutral-100 h-[50px] w-[50px] rounded-md flex justify-center items-center hover:bg-neutral-300 cursor-pointer border-dotted border-2 border-slate-400"
-              onClick={() => setShowAddButton(true)}
-            >
-              <FaPlusCircle color="light-green" />
+            )}
+            <div className="w-full h-[250px] bg-neutral-200 rounded-md">
+              <img
+                src={ImagesStore.length > 0 ? ImagesStore[displayImage] : ""}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="flex gap-2 overflow-auto w-full">
+              {ImagesStore.map((image, index) => (
+                <div
+                  key={index}
+                  className={`bg-neutral-100 h-[50px] w-[50px] rounded-md flex justify-center items-center hover:bg-neutral-300 cursor-pointer ${
+                    index === displayImage ? "border-black border-2" : ""
+                  }`}
+                  onClick={() => setDisplayImage(index)}
+                >
+                  <img src={image} className="w-full h-full object-cover" />
+                </div>
+              ))}
+              <div
+                className="bg-neutral-100 h-[50px] w-[50px] rounded-md flex justify-center items-center hover:bg-neutral-300 cursor-pointer border-dotted border-2 border-slate-400"
+                onClick={() => setShowAddButton(true)}
+              >
+                <FaPlusCircle color="light-green" />
+              </div>
             </div>
           </div>
+        </div>
+        <div className="h-max w-full bg-neutral-100 rounded-lg flex flex-col p-3 gap-1">
+          <h1 className="text-lg font-semibold">Categories</h1>
+          <p className="text-gray-400">Choose parent category</p>
+          <select
+            className="bg-neutral-200 p-2 rounded-md"
+            value={selectedParentCategory}
+            onChange={(e) => setSelectedParentCategory(e.target.value)}
+          >
+            <option disabled value="">
+              Please select a category
+            </option>
+            {categories.length > 0 &&
+              categories.map((category) => (
+                <option key={category.name} value={category.name}>
+                  {category.name}
+                </option>
+              ))}
+          </select>
+          {selectedParentCategory !== "" &&
+            categories
+              .find((cat) => cat.name === selectedParentCategory)
+              ?.subcategories.map((sub) => (
+                <div key={sub} className="flex items-center gap-1">
+                  <input
+                    type="checkbox"
+                    id={sub}
+                    value={sub}
+                    checked={selectedSubcategories.includes(sub)}
+                    onChange={() => handleSubcategoryChange(sub)}
+                    className="cursor-pointer"
+                  />
+                  <label htmlFor={sub} className="cursor-pointer">
+                    {sub}
+                  </label>
+                </div>
+              ))}
         </div>
       </div>
     </div>
