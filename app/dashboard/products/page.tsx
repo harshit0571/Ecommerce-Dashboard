@@ -1,70 +1,115 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import ProductCard from "@/components/ProductCard";
-import { useProducts } from "@/context/ProductProvider";
+import { db } from "@/firebase";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { useRouter } from "next/navigation";
 
 interface Product {
   id: string;
-  label: string;
-  category: string[];
-  stock: number;
-  price: number;
-  images: string[];
-  description: string;
-  listed: boolean;
-  date: string;
-}
-
-interface Category {
-  id: string;
   name: string;
+  price: number;
+  stock: { [size: string]: number };
 }
 
-const ProductList: React.FC = () => {
-  const { products } = useProducts();
-  const [displayProducts, setDisplayProducts] = useState<Product[]>([]);
-  const [showListed, setShowListed] = useState(true);
+const Page: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
-    setDisplayProducts(products.filter((prod) => prod.listed === showListed));
-  }, [products, showListed]);
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const productsCollection = collection(db, "Products");
+      const productSnapshot = await getDocs(productsCollection);
+      const productList: Product[] = productSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Product[];
+      setProducts(productList);
+    } catch (error) {
+      console.error("Error fetching products: ", error);
+    }
+  };
+
+  const handleEdit = (id: string) => {
+    router.push(`/edit/${id}`);
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, "products", id));
+      setProducts(products.filter((product) => product.id !== id));
+    } catch (error) {
+      console.error("Error deleting product: ", error);
+    }
+  };
+
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded shadow-md">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800 ">
-          {showListed ? "Listed Products" : "Unlisted Products"}
-        </h1>
-        <div className="flex gap-3">
-          <button
-            className={`block p-2 rounded-lg text-center text-white ${
-              showListed ? "bg-red-400" : "bg-green-400"
-            } hover:underline`}
-            onClick={() => setShowListed(!showListed)}
-          >
-            {showListed ? "Show Unlisted Products" : "Show Listed Products"}
-          </button>
-          <Link
-            href="products/add"
-            className="block bg-blue-400 p-2 rounded-lg text-center text-white hover:underline"
-          >
-            Add Another Product
-          </Link>
-        </div>
+    <div className="p-5 bg-neutral-100 min-h-screen">
+      <h1 className="text-2xl font-bold mb-5">Products List</h1>
+      <div className="flex justify-between mb-5">
+        <input
+          type="text"
+          placeholder="Search products"
+          className="p-2 rounded-lg border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <select
+          className="p-2 rounded-lg border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value)}
+        >
+          <option value="">All Categories</option>
+          {/* Add options dynamically based on categories */}
+          <option value="category1">Category 1</option>
+          <option value="category2">Category 2</option>
+        </select>
       </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-8">
-        {displayProducts.map((product) => (
-          <ProductCard
+      <div className="flex flex-col space-y-4">
+        {filteredProducts.map((product) => (
+          <div
             key={product.id}
-            product={product}
-            listed={product.listed}
-          />
+            className="flex items-center justify-between bg-neutral-200 p-4 rounded-lg shadow-md"
+          >
+            <div className="flex flex-col">
+              <h2 className="font-bold text-lg">{product.name}</h2>
+              <p className="text-sm text-gray-500">Price: ${product.price}</p>
+              <p className="text-sm text-gray-500">
+                Stock:{" "}
+                {Object.values(product.stock).reduce(
+                  (acc, curr) => acc + curr,
+                  0
+                )}
+              </p>
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => handleEdit(product.id)}
+                className="bg-slate-500 text-white px-3 py-1 rounded"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(product.id)}
+                className="bg-red-500 text-white px-3 py-1 rounded"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         ))}
       </div>
     </div>
   );
 };
 
-export default ProductList;
+export default Page;
