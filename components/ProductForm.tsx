@@ -10,17 +10,49 @@ interface Category {
   subcategories: string[];
 }
 
-const ProductForm = () => {
+interface ProductFormProps {
+  productData?: {
+    name: string;
+    description: string;
+    price: number;
+    discount: number;
+    stock: { [size: string]: number };
+    gender: string;
+    images: string[];
+    category: string;
+    subcategories: string[];
+    sizes: string[];
+  };
+  onSubmit: (data: any) => void;
+}
+
+const ProductForm: React.FC<ProductFormProps> = ({ productData, onSubmit }) => {
   const [showAddButton, setShowAddButton] = useState(false);
-  const [ImagesStore, setImagesStore] = useState<string[]>([]);
+  const [ImagesStore, setImagesStore] = useState<string[]>(
+    productData?.images || []
+  );
   const [imageUrlVal, setImageUrlVal] = useState("");
   const [displayImage, setDisplayImage] = useState(0);
-  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  const [stock, setStock] = useState<{ [size: string]: number }>({});
-  const [gender, setGender] = useState("");
+  const [selectedSizes, setSelectedSizes] = useState<string[]>(
+    productData?.sizes || []
+  );
+  const [stock, setStock] = useState<{ [size: string]: number }>(
+    productData?.stock || {}
+  );
+  const [gender, setGender] = useState(productData?.gender || "");
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedParentCategory, setSelectedParentCategory] = useState("");
-  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
+  const [selectedParentCategory, setSelectedParentCategory] = useState(
+    productData?.category || ""
+  );
+  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>(
+    productData?.subcategories || []
+  );
+  const [name, setName] = useState(productData?.name || "");
+  const [description, setDescription] = useState(
+    productData?.description || ""
+  );
+  const [price, setPrice] = useState(productData?.price || 0);
+  const [discount, setDiscount] = useState(productData?.discount || 0);
 
   useEffect(() => {
     fetchCategories();
@@ -74,21 +106,43 @@ const ProductForm = () => {
     );
   };
 
+  const handleSubmit = () => {
+    const formData = {
+      name,
+      description,
+      price,
+      discount,
+      stock,
+      gender,
+      images: ImagesStore,
+      category: selectedParentCategory,
+      subcategories: selectedSubcategories,
+      sizes: selectedSizes,
+    };
+    console.log(formData, "form");
+  };
+
   return (
     <div className="flex px-10 mt-8 gap-5 pb-5">
       <div className="w-[70%] rounded-lg flex h-max flex-col gap-5">
         <div className="flex-col p-3 gap-5 bg-neutral-100 rounded-lg flex">
-          <h1 className="text-lg font-semibold">General Information</h1>
+          <h1 className="text-lg font-semibold" onClick={()=>{handleSubmit()}}>General Information</h1>
           <div className="flex flex-col gap-1">
             <p>Name Product</p>
             <input
               type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="bg-neutral-200 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
           <div className="flex flex-col gap-1">
             <p>Description of Product</p>
-            <textarea className="bg-neutral-200 p-2 min-h-[100px] rounded-lg focus:outline-none focus:ring-2 focus:ring-black" />
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="bg-neutral-200 p-2 min-h-[100px] rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+            />
           </div>
           <div className="flex flex-col">
             <h1>Size</h1>
@@ -137,6 +191,8 @@ const ProductForm = () => {
                 <p>Price</p>
                 <input
                   type="number"
+                  value={price}
+                  onChange={(e) => setPrice(Number(e.target.value))}
                   className="bg-neutral-200 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                   min={0}
                 />
@@ -145,6 +201,8 @@ const ProductForm = () => {
                 <p>Discount</p>
                 <input
                   type="number"
+                  value={discount}
+                  onChange={(e) => setDiscount(Number(e.target.value))}
                   min={0}
                   className="bg-neutral-200 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                 />

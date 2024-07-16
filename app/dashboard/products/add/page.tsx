@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { MdAddBox } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
@@ -19,7 +20,9 @@ const page = () => {
         </div>
       </div>
 
-      <ProductForm />
+      <ProductForm   productData={undefined} // pass this only when editing
+  onSubmit={()=>{}}
+/>
     </div>
   );
 };
