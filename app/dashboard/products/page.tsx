@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { db } from "@/firebase";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Product {
   id: string;
@@ -36,7 +37,7 @@ const Page: React.FC = () => {
   };
 
   const handleEdit = (id: string) => {
-    router.push(`/edit/${id}`);
+    router.push(`products/edit/${id}`);
   };
 
   const handleDelete = async (id: string) => {
@@ -54,12 +55,20 @@ const Page: React.FC = () => {
 
   return (
     <div className="p-5 bg-neutral-100 min-h-screen">
-      <h1 className="text-2xl font-bold mb-5">Products List</h1>
       <div className="flex justify-between mb-5">
+        <p className="text-2xl font-semibold">Products</p>
+        <Link
+          href={"products/add"}
+          className="flex p-2 px-4 gap-2 items-center justify-center bg-green-300  border-2 border-slate-700 hover:bg-white cursor-pointer"
+        >
+          Add Products
+        </Link>
+      </div>
+      <div className="flex justify-between gap-3 mb-5">
         <input
           type="text"
           placeholder="Search products"
-          className="p-2 rounded-lg border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="p-2 rounded-lg border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-green-500 flex-grow"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
