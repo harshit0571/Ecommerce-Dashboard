@@ -1,4 +1,5 @@
 "use client";
+import { useUser } from "@/context/UserProvider";
 import { db } from "@/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
@@ -111,7 +112,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
         : [...prevSubcategories, subcategory]
     );
   };
-
+  const { user } = useUser();
   const handleSubmit = () => {
     const formData = {
       name,
@@ -124,7 +125,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
       category: selectedParentCategory,
       subcategories: selectedSubcategories,
       sizes: selectedSizes,
-      listed: true,
+      listed: user.role !== "support",
+      date: new Date().toISOString(),
     };
     onSubmit(formData);
     console.log(formData, "form");
@@ -136,7 +138,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
         <div className="flex items-center gap-2">
           <MdAddBox size={25} />
           <p className="text-2xl ">
-            {type === "edit" ? "Edit Product" : "Add New Product"}
+            <p> {type} Product</p>
           </p>
         </div>
         <div>
@@ -147,7 +149,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
             }}
           >
             <FaCheck size={15} />
-            <p> {type === "edit" ? "Edit Product" : "Add Product"}</p>
+            <p> {type} Product</p>
           </button>
         </div>
       </div>
@@ -169,7 +171,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="bg-neutral-200 p-2 min-h-[100px] rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                className="bg-neutral-200 p-2 min-h-[150px] rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
             <div className="flex flex-col">
@@ -180,7 +182,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   <div
                     key={size}
                     className={`p-2 bg-neutral-300 rounded-md cursor-pointer hover:bg-green-200 ${
-                      selectedSizes.includes(size) ? "bg-green-200" : ""
+                      selectedSizes.includes(size)
+                        ? " bg-slate-500 text-white"
+                        : ""
                     }`}
                     onClick={() => handleSizeClick(size)}
                   >

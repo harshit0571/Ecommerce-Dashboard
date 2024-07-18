@@ -10,9 +10,10 @@ interface Product {
   name: string;
   price: number;
   stock: { [size: string]: number };
+  listed: boolean; // Ensure the Product interface includes the listed property
 }
 
-const Page: React.FC = () => {
+const UnlistedProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
@@ -27,7 +28,7 @@ const Page: React.FC = () => {
       const productsCollection = collection(db, "Products");
       const productSnapshot = await getDocs(productsCollection);
       const productList: Product[] = productSnapshot.docs
-        .filter((doc) => doc.data().listed)
+        .filter((doc) => !doc.data().listed) // Fetch unlisted products
         .map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -39,7 +40,7 @@ const Page: React.FC = () => {
   };
 
   const handleEdit = (id: string) => {
-    router.push(`products/edit/${id}`);
+    router.push(`unlisted/${id}`);
   };
 
   const handleDelete = async (id: string) => {
@@ -58,13 +59,13 @@ const Page: React.FC = () => {
   return (
     <div className="p-5 bg-neutral-100 min-h-screen">
       <div className="flex justify-between mb-5">
-        <p className="text-2xl font-semibold">Products</p>
+        <p className="text-2xl font-semibold">Unlisted Products</p>
         <div className="flex gap-3 items-center">
           <Link
-            href={"products/unlisted"}
+            href={"/dashboard/products"}
             className="flex p-2 px-4 gap-2 items-center justify-center bg-slate-600  border-2 border-slate-700 hover:bg-slate-300 cursor-pointer text-white hover:text-slate-700"
           >
-            Unlisted Products
+            Listed Products
           </Link>
           <Link
             href={"products/add"}
@@ -131,4 +132,4 @@ const Page: React.FC = () => {
   );
 };
 
-export default Page;
+export default UnlistedProductsPage;

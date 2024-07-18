@@ -4,12 +4,14 @@ import ProductForm from "@/components/ProductForm";
 import { addDoc, collection, setDoc } from "firebase/firestore";
 import { db } from "@/firebase";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/context/UserProvider";
 
 const page = () => {
   const router = useRouter();
   const addProduct = async (data: any) => {
     try {
-      console.log(data);
+      console.log(data,"yo");
+      // user.role === "support" ? (data.listed = false) : (data.listed = true);
       await addDoc(collection(db, "Products"), data);
       router.push("/dashboard/products");
     } catch (error) {}
@@ -19,7 +21,7 @@ const page = () => {
       <ProductForm
         productData={undefined} // pass this only when editing
         onSubmit={addProduct}
-        type="add"
+        type="Add"
       />
     </div>
   );

@@ -34,7 +34,7 @@ const page = () => {
       {product && (
         <ProductForm
           onSubmit={updateProduct}
-          type="Edit"
+          type="List"
           productData={product}
         />
       )}
