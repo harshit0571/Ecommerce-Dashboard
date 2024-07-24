@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { db } from "@/firebase";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
@@ -93,40 +93,42 @@ const Page: React.FC = () => {
           <option value="category2">Category 2</option>
         </select>
       </div>
-      <div className="flex flex-col space-y-4">
-        {filteredProducts.map((product) => (
-          <div
-            key={product.id}
-            className="flex items-center justify-between bg-neutral-200 p-4 rounded-lg shadow-md"
-          >
-            <div className="flex flex-col">
-              <h2 className="font-bold text-lg">{product.name}</h2>
-              <p className="text-sm text-gray-500">Price: ${product.price}</p>
-              <p className="text-sm text-gray-500">
-                Stock:{" "}
-                {Object.values(product.stock).reduce(
-                  (acc, curr) => acc + curr,
-                  0
-                )}
-              </p>
+      <Suspense fallback="...loading">
+        <div className="flex flex-col space-y-4">
+          {filteredProducts.map((product) => (
+            <div
+              key={product.id}
+              className="flex items-center justify-between bg-neutral-200 p-4 rounded-lg shadow-md"
+            >
+              <div className="flex flex-col">
+                <h2 className="font-bold text-lg">{product.name}</h2>
+                <p className="text-sm text-gray-500">Price: ${product.price}</p>
+                <p className="text-sm text-gray-500">
+                  Stock:{" "}
+                  {Object.values(product.stock).reduce(
+                    (acc, curr) => acc + curr,
+                    0
+                  )}
+                </p>
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => handleEdit(product.id)}
+                  className="bg-slate-500 text-white px-3 py-1 rounded"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(product.id)}
+                  className="bg-red-500 text-white px-3 py-1 rounded"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => handleEdit(product.id)}
-                className="bg-slate-500 text-white px-3 py-1 rounded"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(product.id)}
-                className="bg-red-500 text-white px-3 py-1 rounded"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </Suspense>
     </div>
   );
 };

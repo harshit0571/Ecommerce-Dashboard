@@ -4,6 +4,7 @@ import { addDoc, collection, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 
 interface Category {
+  id: string;
   name: string;
   subcategories: string[];
 }
@@ -11,9 +12,9 @@ interface Category {
 const Page: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [category, setCategory] = useState("");
+  const [categoryName, setCategoryName] = useState("");
 
   useEffect(() => {
     fetchCategories();
@@ -24,18 +25,23 @@ const Page: React.FC = () => {
       const categoriesCollection = collection(db, "categories");
       const categorySnapshot = await getDocs(categoriesCollection);
       const categoryList: Category[] = [];
-      for (const doc of categorySnapshot.docs) {
+      for (const docSnap of categorySnapshot.docs) {
+        const categoryId = docSnap.id;
         const subcategoriesCollection = collection(
           db,
           "categories",
-          doc.data().name,
+          categoryId,
           "subcategories"
         );
         const subcategorySnapshot = await getDocs(subcategoriesCollection);
         const subcategories = subcategorySnapshot.docs.map(
           (subDoc) => subDoc.data().name as string
         );
-        categoryList.push({ name: doc.data().name as string, subcategories });
+        categoryList.push({ 
+          id: categoryId, 
+          name: docSnap.data().name as string, 
+          subcategories 
+        });
       }
       setCategories(categoryList);
     } catch (error) {
@@ -43,43 +49,39 @@ const Page: React.FC = () => {
     }
   };
 
-  const toggleSubcategories = (categoryName: string) => {
+  const toggleSubcategories = (categoryId: string) => {
     setExpandedCategory(
-      expandedCategory === categoryName ? null : categoryName
+      expandedCategory === categoryId ? null : categoryId
     );
   };
 
-  const handleSelect = (categoryName: string) => {
-    setSelectedCategory(categoryName);
+  const handleSelect = (categoryId: string | null) => {
+    setSelectedCategoryId(categoryId);
     setDropdownOpen(false);
   };
 
   const addCategory = async () => {
-    if (!selectedCategory) {
-      alert("Please select a parent category");
-      return;
-    }
-    if (category === "") {
+    if (categoryName === "") {
       alert("Please enter a category name");
       return;
     }
 
     try {
-      if (selectedCategory === "no parent") {
+      if (selectedCategoryId === "no parent" || selectedCategoryId === null) {
         const ref = collection(db, "categories");
-        await addDoc(ref, { name: category });
+        await addDoc(ref, { name: categoryName });
       } else {
         const ref = collection(
           db,
           "categories",
-          selectedCategory,
+          selectedCategoryId,
           "subcategories"
         );
-        await addDoc(ref, { name: category });
+        await addDoc(ref, { name: categoryName });
       }
       alert("Category added successfully");
-      setCategory("");
-      setSelectedCategory(null);
+      setCategoryName("");
+      setSelectedCategoryId(null);
       fetchCategories(); // Refresh categories after adding a new one
     } catch (error) {
       console.error("Error adding category: ", error);
@@ -96,15 +98,15 @@ const Page: React.FC = () => {
             type="text"
             className="p-4 border border-gray-300 rounded-lg focus:outline-none"
             placeholder="Enter category name"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            value={categoryName}
+            onChange={(e) => setCategoryName(e.target.value)}
           />
           <div className="relative">
             <button
               className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none bg-white text-gray-700 text-left"
               onClick={() => setDropdownOpen(!dropdownOpen)}
             >
-              {selectedCategory || "Select a category"}
+              {selectedCategoryId ? categories.find(c => c.id === selectedCategoryId)?.name || "Select a category" : "Select a category"}
             </button>
             {dropdownOpen && (
               <ul className="absolute w-full bg-white border border-gray-300 rounded-lg mt-1 z-10 max-h-60 overflow-y-auto">
@@ -114,11 +116,11 @@ const Page: React.FC = () => {
                 >
                   No parent
                 </li>
-                {categories.map((category, index) => (
+                {categories.map((category) => (
                   <li
-                    key={index}
+                    key={category.id}
                     className="p-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => handleSelect(category.name)}
+                    onClick={() => handleSelect(category.id)}
                   >
                     {category.name}
                   </li>
@@ -138,16 +140,16 @@ const Page: React.FC = () => {
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-xl">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Categories</h2>
         <ul className="list-none">
-          {categories.map((category, index) => (
-            <li key={index} className="mb-4">
+          {categories.map((category) => (
+            <li key={category.id} className="mb-4">
               <div
                 className="flex justify-between items-center cursor-pointer text-gray-700 hover:text-gray-900 font-medium"
-                onClick={() => toggleSubcategories(category.name)}
+                onClick={() => toggleSubcategories(category.id)}
               >
                 <span>{category.name}</span>
-                <span>{expandedCategory === category.name ? "-" : "+"}</span>
+                <span>{expandedCategory === category.id ? "-" : "+"}</span>
               </div>
-              {expandedCategory === category.name && (
+              {expandedCategory === category.id && (
                 <ul className="ml-4 mt-2 list-disc">
                   {category.subcategories.map((subcategory, subIndex) => (
                     <li key={subIndex} className="text-gray-600">

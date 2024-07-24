@@ -4,7 +4,6 @@ import ProductForm from "@/components/ProductForm";
 import { addDoc, collection, setDoc } from "firebase/firestore";
 import { db } from "@/firebase";
 import { useRouter } from "next/navigation";
-import { useUser } from "@/context/UserProvider";
 
 const page = () => {
   const router = useRouter();

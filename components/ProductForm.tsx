@@ -7,6 +7,7 @@ import { FaCheck, FaPlusCircle } from "react-icons/fa";
 import { MdAddBox, MdCancel } from "react-icons/md";
 
 interface Category {
+  id: any;
   name: string;
   subcategories: string[];
 }
@@ -74,16 +75,21 @@ const ProductForm: React.FC<ProductFormProps> = ({
         const subcategoriesCollection = collection(
           db,
           "categories",
-          doc.data().name,
+          doc.id,
           "subcategories"
         );
         const subcategorySnapshot = await getDocs(subcategoriesCollection);
         const subcategories = subcategorySnapshot.docs.map(
           (subDoc) => subDoc.data().name as string
         );
-        categoryList.push({ name: doc.data().name as string, subcategories });
+        categoryList.push({
+          name: doc.data().name as string,
+          id: doc.id as any,
+          subcategories,
+        });
       }
       setCategories(categoryList);
+      console.log(categoryList, "category");
     } catch (error) {
       console.error("Error fetching categories: ", error);
     }
@@ -112,6 +118,21 @@ const ProductForm: React.FC<ProductFormProps> = ({
         : [...prevSubcategories, subcategory]
     );
   };
+  const sizes = [
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL",
+    "UK6",
+    "UK7",
+    "UK8",
+    "UK9",
+    "UK10",
+    "UK11",
+  ];
+
   const { user } = useUser();
   const handleSubmit = () => {
     const formData = {
@@ -178,7 +199,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
               <h1>Size</h1>
               <p className="text-gray-400 text-sm">Pick available sizes</p>
               <div className="flex gap-2 mt-2">
-                {["XS", "S", "M", "L", "XL", "XXL"].map((size) => (
+                {sizes.map((size) => (
                   <div
                     key={size}
                     className={`p-2 bg-neutral-300 rounded-md cursor-pointer hover:bg-green-200 ${
@@ -333,29 +354,31 @@ const ProductForm: React.FC<ProductFormProps> = ({
               </option>
               {categories.length > 0 &&
                 categories.map((category) => (
-                  <option key={category.name} value={category.name}>
+                  <option key={category.name} value={category.id}>
                     {category.name}
                   </option>
                 ))}
             </select>
             {selectedParentCategory !== "" &&
               categories
-                .find((cat) => cat.name === selectedParentCategory)
-                ?.subcategories.map((sub) => (
-                  <div key={sub} className="flex items-center gap-1">
-                    <input
-                      type="checkbox"
-                      id={sub}
-                      value={sub}
-                      checked={selectedSubcategories.includes(sub)}
-                      onChange={() => handleSubcategoryChange(sub)}
-                      className="cursor-pointer"
-                    />
-                    <label htmlFor={sub} className="cursor-pointer">
-                      {sub}
-                    </label>
-                  </div>
-                ))}
+                .find((cat) => cat.id === selectedParentCategory)
+                ?.subcategories.map((sub) => {
+                  return (
+                    <div key={sub} className="flex items-center gap-1">
+                      <input
+                        type="checkbox"
+                        id={sub}
+                        value={sub}
+                        checked={selectedSubcategories.includes(sub)}
+                        onChange={() => handleSubcategoryChange(sub)}
+                        className="cursor-pointer"
+                      />
+                      <label htmlFor={sub} className="cursor-pointer">
+                        {sub}
+                      </label>
+                    </div>
+                  );
+                })}
           </div>
         </div>
       </div>
