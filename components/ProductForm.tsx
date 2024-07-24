@@ -146,11 +146,17 @@ const ProductForm: React.FC<ProductFormProps> = ({
       category: selectedParentCategory,
       subcategories: selectedSubcategories,
       sizes: selectedSizes,
-      listed: user.role !== "support",
+      listed: selectedOption && user.role !== "support",
       date: new Date().toISOString(),
     };
     onSubmit(formData);
     console.log(formData, "form");
+  };
+
+  const [selectedOption, setSelectedOption] = useState(productData?.listed);
+
+  const handleOptionChange = (event: any) => {
+    setSelectedOption(event.target.value === "true");
   };
 
   return (
@@ -379,6 +385,32 @@ const ProductForm: React.FC<ProductFormProps> = ({
                     </div>
                   );
                 })}
+          </div>
+
+          <div className="h-max w-full bg-neutral-100 rounded-lg flex flex-col p-3 gap-1">
+            <h1 className="font-semibold text-lg">Listing Status</h1>
+            <div className="flex gap-5">
+              <label>
+                <input
+                  type="radio"
+                  value={"true"}
+                  checked={selectedOption === true}
+                  onChange={handleOptionChange}
+                  className="mr-1"
+                />
+                Listed
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  value="false"
+                  checked={selectedOption === false}
+                  className="mr-1"
+                  onChange={handleOptionChange}
+                />
+                Unlisted
+              </label>
+            </div>
           </div>
         </div>
       </div>
