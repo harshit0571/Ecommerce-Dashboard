@@ -15,10 +15,10 @@ import { useRouter } from "next/navigation";
 
 const page = () => {
   const router = useRouter();
-  const updateTagsWithProductId = async (tags: string[], productId: string) => {
+  const updateTagsWithProductId = async (tags: any, productId: string) => {
     try {
       for (const tag of tags) {
-        const tagRef = doc(db, "tags", tag);
+        const tagRef = doc(db, "tags", tag.id);
         const tagDoc = await getDoc(tagRef);
 
         if (tagDoc.exists()) {

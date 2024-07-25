@@ -64,6 +64,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const [gender, setGender] = useState(productData?.gender || "");
   const [categories, setCategories] = useState<Category[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
+  const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
   const [newTag, setNewTag] = useState("");
   const [selectedTags, setSelectedTags] = useState<Tag[]>(
     productData?.tags || []
@@ -80,6 +81,17 @@ const ProductForm: React.FC<ProductFormProps> = ({
   );
   const [price, setPrice] = useState(productData?.price || 0);
   const [discount, setDiscount] = useState(productData?.discount || 0);
+
+  useEffect(() => {
+    if (newTag.trim() === "") {
+      setFilteredTags(tags);
+    } else {
+      const filtered = tags.filter((tag) =>
+        tag.name.toLowerCase().includes(newTag.toLowerCase())
+      );
+      setFilteredTags(filtered);
+    }
+  }, [newTag, tags]);
 
   useEffect(() => {
     fetchCategories();
@@ -207,7 +219,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
     };
     onSubmit(formData);
   };
-
 
   const [selectedOption, setSelectedOption] = useState(productData?.listed);
 
@@ -457,14 +468,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 onClick={createTag}
                 className="bg-green-400 text-white p-2 rounded-lg"
               >
-                Add Tag
+                Create New Tag
               </button>
             </div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {tags.map((tag) => (
+            <div className="flex flex-wrap gap-2 mt-2 h-[100px] overflow-auto">
+              {filteredTags.map((tag) => (
                 <div
                   key={tag.id}
-                  className={`p-2 bg-neutral-300 rounded-md cursor-pointer hover:bg-green-200 ${
+                  className={`p-2 bg-neutral-300 rounded-md min-h-[50px] max-h-[50px] min-w-[50px] cursor-pointer hover:bg-green-200 ${
                     selectedTags.some((t) => t.id === tag.id)
                       ? " bg-slate-500 text-white"
                       : ""
