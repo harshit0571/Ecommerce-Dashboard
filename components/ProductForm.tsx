@@ -466,7 +466,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
               />
               <button
                 onClick={createTag}
-                className="bg-green-400 text-white p-2 rounded-lg"
+                className="bg-slate-600 text-white p-2 rounded-lg"
               >
                 Create New Tag
               </button>
@@ -475,7 +475,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
               {filteredTags.map((tag) => (
                 <div
                   key={tag.id}
-                  className={`p-2 bg-neutral-300 rounded-md min-h-[50px] max-h-[50px] min-w-[50px] cursor-pointer hover:bg-green-200 ${
+                  className={`p-2 bg-neutral-300 rounded-md min-h-[40px] max-h-[40px] min-w-[50px] cursor-pointer hover:bg-green-200 ${
                     selectedTags.some((t) => t.id === tag.id)
                       ? " bg-slate-500 text-white"
                       : ""
