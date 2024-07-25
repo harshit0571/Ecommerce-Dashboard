@@ -1,7 +1,15 @@
 "use client";
 import { useUser } from "@/context/UserProvider";
 import { db } from "@/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  doc,
+  getDoc,
+  updateDoc,
+  arrayUnion,
+} from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { FaCheck, FaPlusCircle } from "react-icons/fa";
 import { MdAddBox, MdCancel } from "react-icons/md";
@@ -10,6 +18,11 @@ interface Category {
   id: any;
   name: string;
   subcategories: string[];
+}
+
+interface Tag {
+  id: string;
+  name: string;
 }
 
 interface ProductFormProps {
@@ -24,6 +37,7 @@ interface ProductFormProps {
     category: string;
     subcategories: string[];
     sizes: string[];
+    tags: Tag[];
     listed?: boolean;
   };
   onSubmit: (data: any) => void;
@@ -49,6 +63,11 @@ const ProductForm: React.FC<ProductFormProps> = ({
   );
   const [gender, setGender] = useState(productData?.gender || "");
   const [categories, setCategories] = useState<Category[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [newTag, setNewTag] = useState("");
+  const [selectedTags, setSelectedTags] = useState<Tag[]>(
+    productData?.tags || []
+  );
   const [selectedParentCategory, setSelectedParentCategory] = useState(
     productData?.category || ""
   );
@@ -64,6 +83,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   useEffect(() => {
     fetchCategories();
+    fetchTags();
   }, []);
 
   const fetchCategories = async () => {
@@ -89,9 +109,22 @@ const ProductForm: React.FC<ProductFormProps> = ({
         });
       }
       setCategories(categoryList);
-      console.log(categoryList, "category");
     } catch (error) {
       console.error("Error fetching categories: ", error);
+    }
+  };
+
+  const fetchTags = async () => {
+    try {
+      const tagsCollection = collection(db, "tags");
+      const tagSnapshot = await getDocs(tagsCollection);
+      const tagList: Tag[] = tagSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        name: doc.data().name as string,
+      }));
+      setTags(tagList);
+    } catch (error) {
+      console.error("Error fetching tags: ", error);
     }
   };
 
@@ -118,6 +151,28 @@ const ProductForm: React.FC<ProductFormProps> = ({
         : [...prevSubcategories, subcategory]
     );
   };
+
+  const handleTagChange = (tag: Tag) => {
+    setSelectedTags((prevTags) =>
+      prevTags.some((t) => t.id === tag.id)
+        ? prevTags.filter((t) => t.id !== tag.id)
+        : [...prevTags, tag]
+    );
+  };
+
+  const createTag = async () => {
+    try {
+      if (newTag.trim()) {
+        const tagsCollection = collection(db, "tags");
+        await addDoc(tagsCollection, { name: newTag });
+        setNewTag("");
+        fetchTags(); // Refresh tags list
+      }
+    } catch (error) {
+      console.error("Error creating tag: ", error);
+    }
+  };
+
   const sizes = [
     "XS",
     "S",
@@ -146,12 +201,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
       category: selectedParentCategory,
       subcategories: selectedSubcategories,
       sizes: selectedSizes,
+      tags: selectedTags,
       listed: selectedOption && user.role !== "support",
       date: new Date().toISOString(),
     };
     onSubmit(formData);
-    console.log(formData, "form");
   };
+
 
   const [selectedOption, setSelectedOption] = useState(productData?.listed);
 
@@ -385,6 +441,40 @@ const ProductForm: React.FC<ProductFormProps> = ({
                     </div>
                   );
                 })}
+          </div>
+
+          <div className="h-max w-full bg-neutral-100 rounded-lg flex flex-col p-3 gap-1">
+            <h1 className="text-lg font-semibold">Tags</h1>
+            <div className="flex flex-col gap-2">
+              <input
+                type="text"
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                className="bg-neutral-200 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                placeholder="Add new tag"
+              />
+              <button
+                onClick={createTag}
+                className="bg-green-400 text-white p-2 rounded-lg"
+              >
+                Add Tag
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {tags.map((tag) => (
+                <div
+                  key={tag.id}
+                  className={`p-2 bg-neutral-300 rounded-md cursor-pointer hover:bg-green-200 ${
+                    selectedTags.some((t) => t.id === tag.id)
+                      ? " bg-slate-500 text-white"
+                      : ""
+                  }`}
+                  onClick={() => handleTagChange(tag)}
+                >
+                  {tag.name}
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="h-max w-full bg-neutral-100 rounded-lg flex flex-col p-3 gap-1">
