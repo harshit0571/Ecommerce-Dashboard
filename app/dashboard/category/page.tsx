@@ -90,13 +90,13 @@ const Page: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex flex-col items-center py-10 font-sans">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-xl mb-8">
+    <div className="bg-white min-h-screen flex flex-col items-center py-10 font-sans">
+      <div className="bg-neutral-100 p-8 rounded-lg shadow-md w-full max-w-xl mb-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">Add Category</h1>
         <div className="flex flex-col space-y-4">
           <input
             type="text"
-            className="p-4 border border-gray-300 rounded-lg focus:outline-none"
+            className="p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500"
             placeholder="Enter category name"
             value={categoryName}
             onChange={(e) => setCategoryName(e.target.value)}
@@ -109,9 +109,9 @@ const Page: React.FC = () => {
               {selectedCategoryId ? categories.find(c => c.id === selectedCategoryId)?.name || "Select a category" : "Select a category"}
             </button>
             {dropdownOpen && (
-              <ul className="absolute w-full bg-white border border-gray-300 rounded-lg mt-1 z-10 max-h-60 overflow-y-auto">
+              <ul className="absolute w-full bg-white border border-gray-300 rounded-lg mt-1 z-10 max-h-60 overflow-y-auto shadow-lg">
                 <li
-                  className="p-2 hover:bg-gray-100 cursor-pointer"
+                  className="p-2 hover:bg-gray-200 cursor-pointer"
                   onClick={() => handleSelect("no parent")}
                 >
                   No parent
@@ -119,7 +119,7 @@ const Page: React.FC = () => {
                 {categories.map((category) => (
                   <li
                     key={category.id}
-                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                    className="p-2 hover:bg-gray-200 cursor-pointer"
                     onClick={() => handleSelect(category.id)}
                   >
                     {category.name}
@@ -129,7 +129,7 @@ const Page: React.FC = () => {
             )}
           </div>
           <button
-            className="w-full p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
+            className="w-full p-4 bg-neutral-500 text-white rounded-lg hover:bg-neutral-600 transition duration-300"
             onClick={addCategory}
           >
             Add Category
@@ -137,13 +137,13 @@ const Page: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-xl">
+      <div className="bg-neutral-100 p-8 rounded-lg shadow-md w-full max-w-xl">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Categories</h2>
         <ul className="list-none">
           {categories.map((category) => (
             <li key={category.id} className="mb-4">
               <div
-                className="flex justify-between items-center cursor-pointer text-gray-700 hover:text-gray-900 font-medium"
+                className="flex justify-between items-center cursor-pointer text-gray-700 hover:text-gray-800 font-medium"
                 onClick={() => toggleSubcategories(category.id)}
               >
                 <span>{category.name}</span>

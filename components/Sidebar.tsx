@@ -44,12 +44,12 @@ const sidebarItems = [
     visible: ["super admin"],
     href: "/dashboard/permissions",
   },
-  {
-    icon: <MdSettings size={30} className="m-auto" />,
-    label: "Settings",
-    visible: ["super admin", "support", "admin"],
-    href: "/dashboard/user-info",
-  },
+  // {
+  //   icon: <MdSettings size={30} className="m-auto" />,
+  //   label: "Settings",
+  //   visible: ["super admin", "support", "admin"],
+  //   href: "/dashboard/user-info",
+  // },
 ];
 
 const Sidebar = () => {
