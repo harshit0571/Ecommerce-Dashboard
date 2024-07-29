@@ -119,50 +119,52 @@ const Page: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Members List</h1>
-      <div className="mb-8">
-        <button
-          className={`mr-4 ${
-            filter === "all"
-              ? "bg-blue-500 text-white"
-              : "bg-gray-200 text-gray-800"
-          } px-4 py-2 rounded-lg`}
-          onClick={() => handleFilterClick("all")}
-        >
-          All Users
-        </button>
-        <button
-          className={`mr-4 ${
-            filter === "verified"
-              ? "bg-green-500 text-white"
-              : "bg-gray-200 text-gray-800"
-          } px-4 py-2 rounded-lg`}
-          onClick={() => handleFilterClick("verified")}
-        >
-          Verified Users
-        </button>
-        <button
-          className={`mr-4 ${
-            filter === "unverified"
-              ? "bg-red-500 text-white"
-              : "bg-gray-200 text-gray-800"
-          } px-4 py-2 rounded-lg`}
-          onClick={() => handleFilterClick("unverified")}
-        >
-          Unverified Users
-        </button>
+    <div className="p-5 bg-neutral-100 min-h-screen">
+      <div className="flex justify-between mb-5">
+        <h1 className="text-3xl font-bold">Members List</h1>
+        <div className="flex gap-3">
+          <button
+            className={`${
+              filter === "all"
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-800"
+            } px-4 py-2 rounded-lg`}
+            onClick={() => handleFilterClick("all")}
+          >
+            All Users
+          </button>
+          <button
+            className={`${
+              filter === "verified"
+                ? "bg-green-500 text-white"
+                : "bg-gray-200 text-gray-800"
+            } px-4 py-2 rounded-lg`}
+            onClick={() => handleFilterClick("verified")}
+          >
+            Verified Users
+          </button>
+          <button
+            className={`${
+              filter === "unverified"
+                ? "bg-red-500 text-white"
+                : "bg-gray-200 text-gray-800"
+            } px-4 py-2 rounded-lg`}
+            onClick={() => handleFilterClick("unverified")}
+          >
+            Unverified Users
+          </button>
+        </div>
       </div>
-      <div>
+      <div className="flex flex-col space-y-4">
         {filteredMembers.map((member) => (
           <div
             key={member.id}
-            className="bg-white shadow-md rounded-lg p-4 mb-4"
+            className="flex items-center justify-between bg-white p-4 rounded-lg shadow-md"
           >
-            <p className="text-lg font-semibold">{member.name}</p>
-            <p className="text-gray-600">{member.email}</p>
-            <div className="flex items-center mt-2">
-              <div className="flex items-center mr-4">
+            <div className="flex flex-col">
+              <h2 className="font-bold text-lg">{member.name}</h2>
+              <p className="text-sm text-gray-500">{member.email}</p>
+              <div className="flex items-center mt-2">
                 <label
                   htmlFor={`role_${member.id}`}
                   className="mr-2 font-semibold"
@@ -180,6 +182,8 @@ const Page: React.FC = () => {
                   <option value="super admin">Super Admin</option>
                 </select>
               </div>
+            </div>
+            <div className="flex space-x-2">
               <button
                 className={`px-4 py-2 rounded-lg ${
                   member.verification
