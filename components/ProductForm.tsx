@@ -1,15 +1,7 @@
 "use client";
 import { useUser } from "@/context/UserProvider";
 import { db } from "@/firebase";
-import {
-  collection,
-  getDocs,
-  addDoc,
-  doc,
-  getDoc,
-  updateDoc,
-  arrayUnion,
-} from "firebase/firestore";
+import { collection, getDocs, addDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { FaCheck, FaPlusCircle } from "react-icons/fa";
 import { MdAddBox, MdCancel } from "react-icons/md";
@@ -39,6 +31,7 @@ interface ProductFormProps {
     sizes: string[];
     tags: Tag[];
     listed?: boolean;
+    brand?: Tag;
   };
   onSubmit: (data: any) => void;
   type: string;
@@ -224,6 +217,61 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   const handleOptionChange = (event: any) => {
     setSelectedOption(event.target.value === "true");
+  };
+
+  const [brands, setBrands] = useState<Tag[]>([]);
+  const [filteredBrands, setFilteredBrands] = useState<Tag[]>([]);
+  const [newBrand, setNewBrand] = useState("");
+  const [selectedBrand, setSelectedBrand] = useState<Tag | null>(
+    productData?.brand || null
+  );
+
+  useEffect(() => {
+    if (newBrand.trim() === "") {
+      setFilteredBrands(brands);
+    } else {
+      const filtered = brands.filter((brand) =>
+        brand.name.toLowerCase().includes(newBrand.toLowerCase())
+      );
+      setFilteredBrands(filtered);
+    }
+  }, [newBrand, brands]);
+
+  useEffect(() => {
+    fetchBrands();
+  }, []);
+
+  const fetchBrands = async () => {
+    try {
+      const brandsCollection = collection(db, "brands");
+      const brandSnapshot = await getDocs(brandsCollection);
+      const brandList: Tag[] = brandSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        name: doc.data().name as string,
+      }));
+      setBrands(brandList);
+    } catch (error) {
+      console.error("Error fetching brands: ", error);
+    }
+  };
+
+  const createBrand = async () => {
+    try {
+      if (newBrand.trim()) {
+        const brandsCollection = collection(db, "brands");
+        await addDoc(brandsCollection, { name: newBrand });
+        setNewBrand("");
+        fetchBrands(); // Refresh brands list
+      }
+    } catch (error) {
+      console.error("Error creating brand: ", error);
+    }
+  };
+
+  const handleBrandChange = (brand: Tag) => {
+    setSelectedBrand((prevBrand) =>
+      prevBrand?.id === brand.id ? null : brand
+    );
   };
 
   return (
@@ -483,6 +531,40 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   onClick={() => handleTagChange(tag)}
                 >
                   {tag.name}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="h-max w-full bg-neutral-100 rounded-lg flex flex-col p-3 gap-1">
+            <h1 className="text-lg font-semibold">Brands</h1>
+            <div className="flex flex-col gap-2">
+              <input
+                type="text"
+                value={newBrand}
+                onChange={(e) => setNewBrand(e.target.value)}
+                className="bg-neutral-200 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                placeholder="Add new brand"
+              />
+              <button
+                onClick={createBrand}
+                className="bg-slate-600 text-white p-2 rounded-lg"
+              >
+                Create New Brand
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2 h-[100px] overflow-auto">
+              {filteredBrands.map((brand) => (
+                <div
+                  key={brand.id}
+                  className={`p-2 bg-neutral-300 rounded-md min-h-[40px] max-h-[40px] min-w-[50px] cursor-pointer hover:bg-green-200 ${
+                    selectedBrand?.id === brand.id
+                      ? " bg-slate-500 text-white"
+                      : ""
+                  }`}
+                  onClick={() => handleBrandChange(brand)}
+                >
+                  {brand.name}
                 </div>
               ))}
             </div>

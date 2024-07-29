@@ -13,7 +13,7 @@ const OrderDetailsPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log(orderId,"dsdss")
+    console.log(orderId, "dsdss");
 
     if (!orderId) return;
 
@@ -89,10 +89,8 @@ const OrderDetailsPage = () => {
         <p className="text-lg font-medium mb-2">
           Date Ordered: {new Date(order?.date).toLocaleDateString()}
         </p>
-        <p className="text-lg font-medium mb-2">
-          User Id: {order?.uid}
-        </p>
-        <Link href="/orders">
+        <p className="text-lg font-medium mb-2">User Id: {order?.uid}</p>
+        <Link href="/dashboard/orders">
           <p className="text-blue-500 hover:underline">Back to Orders</p>
         </Link>
       </div>
