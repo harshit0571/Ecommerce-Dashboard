@@ -30,7 +30,7 @@ const sidebarItems = [
     icon: <MdShoppingCart size={30} className="m-auto" />,
     label: "Orders",
     visible: ["super admin", "admin"],
-    href: "/dashboard/user-info",
+    href: "/dashboard/orders",
   },
   {
     icon: <FaUser size={30} className="m-auto" />,
