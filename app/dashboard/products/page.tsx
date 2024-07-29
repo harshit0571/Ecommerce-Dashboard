@@ -10,6 +10,7 @@ interface Product {
   name: string;
   price: number;
   stock: { [size: string]: number };
+  date: string; // Assume products have a dateAdded field in ISO format
 }
 
 const Page: React.FC = () => {
@@ -53,13 +54,18 @@ const Page: React.FC = () => {
     }
   };
 
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProducts = products
+    .filter((product) =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const currentProducts = filteredProducts.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct
+  );
 
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
@@ -78,13 +84,13 @@ const Page: React.FC = () => {
         <div className="flex gap-3 items-center">
           <Link
             href={"products/unlisted"}
-            className="flex p-2 px-4 gap-2 items-center justify-center bg-slate-600  border-2 border-slate-700 hover:bg-slate-300 cursor-pointer text-white hover:text-slate-700"
+            className="flex p-2 px-4 gap-2 items-center justify-center bg-slate-600 border-2 border-slate-700 hover:bg-slate-300 cursor-pointer text-white hover:text-slate-700"
           >
             Unlisted Products
           </Link>
           <Link
             href={"products/add"}
-            className="flex p-2 px-4 gap-2 items-center justify-center bg-green-300  border-2 border-slate-700 hover:bg-white cursor-pointer"
+            className="flex p-2 px-4 gap-2 items-center justify-center bg-green-300 border-2 border-slate-700 hover:bg-white cursor-pointer"
           >
             Add Products
           </Link>
@@ -115,6 +121,9 @@ const Page: React.FC = () => {
                     (acc, curr) => acc + curr,
                     0
                   )}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Date Added: {new Date(product.date).toLocaleDateString()}
                 </p>
               </div>
               <div className="flex space-x-2">
