@@ -93,16 +93,7 @@ const Page: React.FC = () => {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <select
-          className="p-2 rounded-lg border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-green-500"
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-        >
-          <option value="">All Categories</option>
-          {/* Add options dynamically based on categories */}
-          <option value="category1">Category 1</option>
-          <option value="category2">Category 2</option>
-        </select>
+     
       </div>
       <div className="flex flex-col space-y-4">
         {filteredOrders.map((order) => {

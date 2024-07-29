@@ -6,6 +6,7 @@ import { auth, db } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
 import { useUser } from "@/context/UserProvider";
+import Link from "next/link";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -92,6 +93,13 @@ const LoginPage = () => {
           >
             Login
           </button>
+          <Link
+            href="/register"
+            className="text-center w-full flex justify-center items-center mt-5 text-blue-500"
+          >
+            <span>Register</span>
+          </Link>
+    
         </form>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -108,6 +109,12 @@ const RegisterPage = () => {
           >
             Register
           </button>
+          <Link
+            href="/login"
+            className="text-center w-full flex justify-center items-center mt-5 text-blue-500"
+          >
+            <span>Login</span>
+          </Link>
         </form>
       </div>
     </div>

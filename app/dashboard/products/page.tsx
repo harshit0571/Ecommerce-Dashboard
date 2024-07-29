@@ -16,6 +16,8 @@ const Page: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 5; // Adjust the number of products per page as needed
   const router = useRouter();
 
   useEffect(() => {
@@ -55,6 +57,20 @@ const Page: React.FC = () => {
     product.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+  const handlePreviousPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
+  };
+
   return (
     <div className="p-5 bg-neutral-100 min-h-screen">
       <div className="flex justify-between mb-5">
@@ -82,20 +98,10 @@ const Page: React.FC = () => {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <select
-          className="p-2 rounded-lg border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-green-500"
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-        >
-          <option value="">All Categories</option>
-          {/* Add options dynamically based on categories */}
-          <option value="category1">Category 1</option>
-          <option value="category2">Category 2</option>
-        </select>
       </div>
       <Suspense fallback="...loading">
         <div className="flex flex-col space-y-4">
-          {filteredProducts.map((product) => (
+          {currentProducts.map((product) => (
             <div
               key={product.id}
               className="flex items-center justify-between bg-neutral-200 p-4 rounded-lg shadow-md"
@@ -129,6 +135,25 @@ const Page: React.FC = () => {
           ))}
         </div>
       </Suspense>
+      <div className="flex justify-between mt-5">
+        <button
+          onClick={handlePreviousPage}
+          disabled={currentPage === 1}
+          className="bg-slate-500 text-white px-3 py-1 rounded disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+          className="bg-slate-500 text-white px-3 py-1 rounded disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };
