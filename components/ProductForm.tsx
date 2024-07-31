@@ -31,7 +31,7 @@ interface ProductFormProps {
     sizes: string[];
     tags: Tag[];
     listed?: boolean;
-    brand?: Tag;
+    brands?: Tag;
   };
   onSubmit: (data: any) => void;
   type: string;
@@ -209,6 +209,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       tags: selectedTags,
       listed: selectedOption && user.role !== "support",
       date: new Date().toISOString(),
+      brands: selectedBrand,
     };
     onSubmit(formData);
   };
@@ -223,7 +224,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const [filteredBrands, setFilteredBrands] = useState<Tag[]>([]);
   const [newBrand, setNewBrand] = useState("");
   const [selectedBrand, setSelectedBrand] = useState<Tag | null>(
-    productData?.brand || null
+    productData?.brands || null
   );
 
   useEffect(() => {
